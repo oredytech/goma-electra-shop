@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -134,14 +135,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
-      {/* Toasts (sonner) lazy: rendered via dynamic import to avoid SSR issue if any */}
-      <SonnerToaster />
+      <Toaster position="top-right" richColors closeButton />
     </QueryClientProvider>
   );
-}
-
-function SonnerToaster() {
-  // Re-export to keep import close to use site
-  const { Toaster } = require("sonner") as typeof import("sonner");
-  return <Toaster position="top-right" richColors closeButton />;
 }
