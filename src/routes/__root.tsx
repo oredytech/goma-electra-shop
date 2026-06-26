@@ -117,11 +117,31 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Reflect auth changes in router/query cache (managed integration handles redirects)
+    import("@/integrations/supabase/client").then(({ supabase }) => {
+      const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+        if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+        router.invalidate();
+        if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      });
+      (window as unknown as { __conetecAuthSub?: { subscription: { unsubscribe: () => void } } }).__conetecAuthSub = sub;
+    });
+  }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      {/* Toasts (sonner) lazy: rendered via dynamic import to avoid SSR issue if any */}
+      <SonnerToaster />
     </QueryClientProvider>
   );
+}
+
+function SonnerToaster() {
+  // Re-export to keep import close to use site
+  const { Toaster } = require("sonner") as typeof import("sonner");
+  return <Toaster position="top-right" richColors closeButton />;
 }
