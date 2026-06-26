@@ -1,0 +1,101 @@
+import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect } from "react";
+import { getMyRole } from "@/lib/admin.functions";
+import { Button } from "@/components/ui/button";
+import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings, LogOut, Home } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import logoAsset from "@/assets/conetec-logo.png.asset.json";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/_authenticated/admin")({
+  component: AdminLayout,
+});
+
+const nav = [
+  { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
+  { to: "/admin/products", label: "Produits", icon: Package },
+  { to: "/admin/orders", label: "Commandes", icon: ShoppingCart },
+  { to: "/admin/stock", label: "Stock", icon: Warehouse },
+  { to: "/admin/reports", label: "Rapports", icon: BarChart3 },
+  { to: "/admin/settings", label: "Paramètres", icon: Settings },
+];
+
+function AdminLayout() {
+  const navigate = useNavigate();
+  const fetchRole = useServerFn(getMyRole);
+  const role = useQuery({ queryKey: ["my-role"], queryFn: () => fetchRole() });
+
+  useEffect(() => {
+    if (role.isSuccess && !role.data.isStaff) {
+      toast.error("Accès refusé : vous n'êtes pas membre du staff");
+      navigate({ to: "/" });
+    }
+  }, [role.isSuccess, role.data, navigate]);
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    navigate({ to: "/auth" });
+  }
+
+  if (role.isLoading) return <div className="grid min-h-screen place-items-center text-muted-foreground">Chargement…</div>;
+  if (role.isError) return (
+    <div className="grid min-h-screen place-items-center p-8 text-center">
+      <div>
+        <h2 className="text-xl font-semibold">Accès impossible</h2>
+        <p className="mt-1 text-muted-foreground">{(role.error as Error).message}</p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Aucun rôle n'est encore assigné. Connectez-vous à Lovable Cloud et insérez votre user_id dans la table <code>user_roles</code> avec le rôle <code>admin</code>.
+        </p>
+        <Button asChild className="mt-4"><Link to="/">Retour</Link></Button>
+      </div>
+    </div>
+  );
+  if (!role.data?.isStaff) return null;
+
+  return (
+    <div className="grid min-h-screen lg:grid-cols-[260px_1fr]">
+      <aside className="hidden border-r bg-card lg:flex lg:flex-col">
+        <div className="border-b p-4">
+          <Link to="/" className="flex items-center gap-2">
+            <img src={logoAsset.url} alt="CONETEC" className="h-9 w-auto" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</span>
+          </Link>
+        </div>
+        <nav className="flex-1 space-y-1 p-3">
+          {nav.map((n) => (
+            <Link
+              key={n.to}
+              to={n.to}
+              activeOptions={{ exact: n.exact }}
+              activeProps={{ className: "bg-gradient-brand text-brand-foreground" }}
+              inactiveProps={{ className: "hover:bg-secondary text-foreground/80" }}
+              className="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition"
+            >
+              <n.icon className="size-4" /> {n.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="space-y-1 border-t p-3">
+          <Button asChild variant="ghost" size="sm" className="w-full justify-start">
+            <Link to="/"><Home className="mr-2 size-4" /> Voir le site</Link>
+          </Button>
+          <Button onClick={signOut} variant="ghost" size="sm" className="w-full justify-start text-destructive hover:text-destructive">
+            <LogOut className="mr-2 size-4" /> Déconnexion
+          </Button>
+        </div>
+      </aside>
+
+      <div className="flex flex-col">
+        <header className="flex items-center justify-between border-b bg-card px-4 py-3 lg:hidden">
+          <Link to="/admin"><img src={logoAsset.url} alt="CONETEC" className="h-8 w-auto" /></Link>
+          <Button onClick={signOut} variant="ghost" size="sm"><LogOut className="size-4" /></Button>
+        </header>
+        <main className="flex-1 bg-secondary/30 p-4 sm:p-6 lg:p-8">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+}
