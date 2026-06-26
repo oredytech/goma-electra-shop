@@ -53,7 +53,7 @@ function BoutiquePage() {
   const add = useCart((s) => s.add);
 
   function applySearch() {
-    nav({ search: (s) => ({ ...s, q: search || undefined }) });
+    nav({ search: (s: { cat?: string; q?: string }) => ({ ...s, q: search || undefined }) });
   }
 
   return (
@@ -86,7 +86,7 @@ function BoutiquePage() {
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Catégories</h3>
           <div className="space-y-1">
             <button
-              onClick={() => nav({ search: (s) => ({ ...s, cat: undefined }) })}
+              onClick={() => nav({ search: (s: { cat?: string; q?: string }) => ({ ...s, cat: undefined }) })}
               className={`w-full rounded-md px-3 py-2 text-left text-sm transition ${!cat ? "bg-gradient-brand text-brand-foreground" : "hover:bg-secondary"}`}
             >
               Toutes ({cats.data?.length ?? 0})
@@ -94,7 +94,7 @@ function BoutiquePage() {
             {cats.data?.map((c) => (
               <button
                 key={c.id}
-                onClick={() => nav({ search: (s) => ({ ...s, cat: c.slug }) })}
+                onClick={() => nav({ search: (s: { cat?: string; q?: string }) => ({ ...s, cat: c.slug }) })}
                 className={`w-full rounded-md px-3 py-2 text-left text-sm transition ${cat === c.slug ? "bg-gradient-brand text-brand-foreground" : "hover:bg-secondary"}`}
               >
                 {c.name}
