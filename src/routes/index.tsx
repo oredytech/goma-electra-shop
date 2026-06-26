@@ -53,17 +53,17 @@ function HomePage() {
             <img src={logoAsset.url} alt="CONETEC" className="h-10 w-auto" />
           </Link>
           <nav className="hidden items-center gap-7 text-sm font-medium md:flex">
-            <a href="#boutique" className="text-foreground/70 hover:text-foreground">Boutique</a>
+            <Link to="/boutique" className="text-foreground/70 hover:text-foreground">Boutique</Link>
             <a href="#services" className="text-foreground/70 hover:text-foreground">Services</a>
             <a href="#comment" className="text-foreground/70 hover:text-foreground">Comment ça marche</a>
             <a href="#contact" className="text-foreground/70 hover:text-foreground">Contact</a>
           </nav>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Link to="/">Se connecter</Link>
+              <Link to="/auth">Se connecter</Link>
             </Button>
             <Button asChild size="sm" className="bg-gradient-brand text-brand-foreground shadow-accent hover:opacity-95">
-              <a href="#boutique"><ShoppingBag className="mr-1.5 size-4" /> Boutique</a>
+              <Link to="/boutique"><ShoppingBag className="mr-1.5 size-4" /> Boutique</Link>
             </Button>
           </div>
         </div>
@@ -88,7 +88,7 @@ function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg" className="bg-white text-brand hover:bg-white/90">
-                <a href="#boutique"><ShoppingBag className="mr-2 size-5" /> Voir la boutique</a>
+                <Link to="/boutique"><ShoppingBag className="mr-2 size-5" /> Voir la boutique</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/0 text-white hover:bg-white/10">
                 <a href="#services">Demander un technicien <ArrowRight className="ml-2 size-5" /></a>
@@ -220,7 +220,7 @@ function HomePage() {
               <a href="#contact"><Phone className="mr-2 size-5" /> Nous appeler</a>
             </Button>
             <Button asChild size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10">
-              <a href="#boutique">Voir la boutique</a>
+              <Link to="/boutique">Voir la boutique</Link>
             </Button>
           </div>
         </div>
@@ -247,7 +247,7 @@ function HomePage() {
           <div>
             <h4 className="text-sm font-semibold">Liens</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><a href="#boutique" className="hover:text-foreground">Boutique</a></li>
+              <li><Link to="/boutique" className="hover:text-foreground">Boutique</Link></li>
               <li><a href="#services" className="hover:text-foreground">Services</a></li>
               <li><a href="#comment" className="hover:text-foreground">Comment commander</a></li>
             </ul>
