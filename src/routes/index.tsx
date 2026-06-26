@@ -53,7 +53,7 @@ function HomePage() {
             <img src={logoAsset.url} alt="CONETEC" className="h-10 w-auto" />
           </Link>
           <nav className="hidden items-center gap-7 text-sm font-medium md:flex">
-            <Link to="/boutique" className="text-foreground/70 hover:text-foreground">Boutique</a>
+            <Link to="/boutique" className="text-foreground/70 hover:text-foreground">Boutique</Link>
             <a href="#services" className="text-foreground/70 hover:text-foreground">Services</a>
             <a href="#comment" className="text-foreground/70 hover:text-foreground">Comment ça marche</a>
             <a href="#contact" className="text-foreground/70 hover:text-foreground">Contact</a>
@@ -220,7 +220,7 @@ function HomePage() {
               <a href="#contact"><Phone className="mr-2 size-5" /> Nous appeler</a>
             </Button>
             <Button asChild size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10">
-              <Link to="/boutique">Voir la boutique</a>
+              <Link to="/boutique">Voir la boutique</Link>
             </Button>
           </div>
         </div>
@@ -247,7 +247,7 @@ function HomePage() {
           <div>
             <h4 className="text-sm font-semibold">Liens</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/boutique" className="hover:text-foreground">Boutique</a></li>
+              <li><Link to="/boutique" className="hover:text-foreground">Boutique</Link></li>
               <li><a href="#services" className="hover:text-foreground">Services</a></li>
               <li><a href="#comment" className="hover:text-foreground">Comment commander</a></li>
             </ul>
