@@ -60,10 +60,10 @@ function HomePage() {
           </nav>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Link to="/">Se connecter</Link>
+              <Link to="/auth">Se connecter</Link>
             </Button>
             <Button asChild size="sm" className="bg-gradient-brand text-brand-foreground shadow-accent hover:opacity-95">
-              <Link to="/boutique"><ShoppingBag className="mr-1.5 size-4" /> Boutique</a>
+              <Link to="/boutique"><ShoppingBag className="mr-1.5 size-4" /> Boutique</Link>
             </Button>
           </div>
         </div>
@@ -88,7 +88,7 @@ function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg" className="bg-white text-brand hover:bg-white/90">
-                <Link to="/boutique"><ShoppingBag className="mr-2 size-5" /> Voir la boutique</a>
+                <Link to="/boutique"><ShoppingBag className="mr-2 size-5" /> Voir la boutique</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/0 text-white hover:bg-white/10">
                 <a href="#services">Demander un technicien <ArrowRight className="ml-2 size-5" /></a>
