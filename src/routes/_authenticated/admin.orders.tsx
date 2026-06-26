@@ -138,12 +138,15 @@ function AdminOrders() {
 
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm text-muted-foreground">Marquer comme :</span>
-                {["pending", "paid", "delivered", "failed", "cancelled"].map((s) => (
-                  <Button key={s} size="sm" variant={detail.data!.order.status === s ? "default" : "outline"}
-                    onClick={() => setStatus(detail.data!.order.id, s)}>
-                    {s}
-                  </Button>
-                ))}
+                {["pending", "paid", "delivered", "failed", "cancelled"].map((s) => {
+                  const order = detail.data!.order!;
+                  return (
+                    <Button key={s} size="sm" variant={order.status === s ? "default" : "outline"}
+                      onClick={() => setStatus(order.id, s)}>
+                      {s}
+                    </Button>
+                  );
+                })}
               </div>
 
               {detail.data.invoice && (

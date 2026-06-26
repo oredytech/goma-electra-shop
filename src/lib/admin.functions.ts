@@ -175,7 +175,7 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertStaff(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = { status: data.status };
+    const patch: { status: typeof data.status; paid_at?: string } = { status: data.status };
     if (data.status === "paid") patch.paid_at = new Date().toISOString();
     const { error } = await supabaseAdmin.from("orders").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -225,10 +225,11 @@ export const saveSettings = createServerFn({ method: "POST" })
     if (!admin) throw new Error("Admin only");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // Don't overwrite api_key if user submitted masked value
-    const patch: Record<string, unknown> = { ...data };
-    if (typeof patch.shwary_api_key === "string" && patch.shwary_api_key.startsWith("••")) {
-      delete patch.shwary_api_key;
-    }
+    const { shwary_api_key, ...rest } = data;
+    const patch: typeof data | Omit<typeof data, "shwary_api_key"> =
+      typeof shwary_api_key === "string" && shwary_api_key.startsWith("••")
+        ? rest
+        : data;
     const { error } = await supabaseAdmin.from("shop_settings").update(patch).eq("id", true);
     if (error) throw new Error(error.message);
     return { ok: true };

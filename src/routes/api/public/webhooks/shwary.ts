@@ -54,7 +54,7 @@ export const Route = createFileRoute("/api/public/webhooks/shwary")({
           status === "failed" || status === "cancelled" ? "failed" :
           "pending";
 
-        const patch: Record<string, unknown> = {
+        const patch: { status: "paid" | "failed" | "pending"; payment_reference: string | null; paid_at?: string } = {
           status: mapped,
           payment_reference: transactionId ?? null,
         };
