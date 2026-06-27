@@ -157,10 +157,11 @@ function HomePage() {
               Parcourez nos rayons. Le catalogue complet sera ouvert à la mise en ligne du backend.
             </p>
           </div>
-          <Button variant="ghost" className="hidden sm:inline-flex" disabled>
-            Tout voir <ArrowRight className="ml-1.5 size-4" />
+          <Button asChild variant="ghost" className="hidden sm:inline-flex">
+            <Link to="/boutique">Tout voir <ArrowRight className="ml-1.5 size-4" /></Link>
           </Button>
         </div>
+
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {categories.map((c) => (
             <Card key={c.name} className="group cursor-pointer border-border p-4 transition hover:-translate-y-0.5 hover:border-accent hover:shadow-accent">
