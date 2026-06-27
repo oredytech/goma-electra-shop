@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect } from "react";
+
 import { getMyRole, claimFirstAdmin } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings, LogOut, Home, Users, ShieldCheck } from "lucide-react";
