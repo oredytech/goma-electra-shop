@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -7,6 +9,9 @@ import {
 } from "lucide-react";
 import logoAsset from "@/assets/conetec-logo.png.asset.json";
 import heroImg from "@/assets/hero-electrician.jpg";
+import { listProducts } from "@/lib/catalog.functions";
+import { formatUSD } from "@/lib/format";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -44,6 +49,13 @@ const steps = [
 ];
 
 function HomePage() {
+  const fProducts = useServerFn(listProducts);
+  const products = useQuery({
+    queryKey: ["home-products"],
+    queryFn: () => fProducts({ data: { limit: 8 } }),
+  });
+  const items = products.data ?? [];
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* NAV */}
@@ -145,10 +157,11 @@ function HomePage() {
               Parcourez nos rayons. Le catalogue complet sera ouvert à la mise en ligne du backend.
             </p>
           </div>
-          <Button variant="ghost" className="hidden sm:inline-flex" disabled>
-            Tout voir <ArrowRight className="ml-1.5 size-4" />
+          <Button asChild variant="ghost" className="hidden sm:inline-flex">
+            <Link to="/boutique">Tout voir <ArrowRight className="ml-1.5 size-4" /></Link>
           </Button>
         </div>
+
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {categories.map((c) => (
             <Card key={c.name} className="group cursor-pointer border-border p-4 transition hover:-translate-y-0.5 hover:border-accent hover:shadow-accent">
@@ -161,6 +174,82 @@ function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* PRODUITS EN VEDETTE */}
+      <section className="bg-secondary/30">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+          <div className="mb-10 flex items-end justify-between gap-4">
+            <div>
+              <span className="text-sm font-semibold uppercase tracking-wider text-accent">Nos produits</span>
+              <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Derniers articles ajoutés</h2>
+              <p className="mt-2 max-w-xl text-muted-foreground">
+                Découvrez les produits récemment mis en boutique.
+              </p>
+            </div>
+            <Button asChild variant="ghost" className="hidden sm:inline-flex">
+              <Link to="/boutique">Voir la boutique <ArrowRight className="ml-1.5 size-4" /></Link>
+            </Button>
+          </div>
+
+          {products.isLoading && (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Card key={i} className="h-72 animate-pulse border-border bg-muted/40" />
+              ))}
+            </div>
+          )}
+
+          {!products.isLoading && items.length === 0 && (
+            <Card className="border-dashed border-border p-10 text-center text-muted-foreground">
+              Aucun produit pour le moment. Ajoutez vos premiers articles depuis l'espace
+              <Link to="/admin" className="ml-1 font-medium text-accent hover:underline">administration</Link>.
+            </Card>
+          )}
+
+          {items.length > 0 && (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {items.map((p: any) => (
+                <Link
+                  key={p.id}
+                  to="/boutique"
+                  className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition hover:-translate-y-0.5 hover:border-accent hover:shadow-accent"
+                >
+                  <div className="aspect-square w-full overflow-hidden bg-muted">
+                    {p.image_url ? (
+                      <img
+                        src={p.image_url}
+                        alt={p.name}
+                        loading="lazy"
+                        className="size-full object-cover transition group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="grid size-full place-items-center text-muted-foreground">
+                        <Package className="size-10" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col p-3">
+                    {p.categories?.name && (
+                      <div className="text-[11px] font-medium uppercase tracking-wider text-accent">
+                        {p.categories.name}
+                      </div>
+                    )}
+                    <div className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug">{p.name}</div>
+                    <div className="mt-auto flex items-end justify-between pt-3">
+                      <div className="text-base font-bold text-brand">{formatUSD(p.price_usd)}</div>
+                      <span className="text-xs text-muted-foreground">
+                        {p.stock > 0 ? "En stock" : "Rupture"}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+
 
       {/* SERVICES */}
       <section id="services" className="bg-secondary/40">

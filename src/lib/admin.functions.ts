@@ -266,3 +266,85 @@ export const salesReport = createServerFn({ method: "GET" })
       orders: all,
     };
   });
+
+// -------- TEAM / ROLES --------
+const ROLE_VALUES = ["admin", "manager", "staff", "customer"] as const;
+
+async function assertAdmin(ctx: { supabase: any; userId: string }) {
+  const { data, error } = await ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" });
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Réservé aux administrateurs.");
+}
+
+export const claimFirstAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { count, error: cErr } = await supabaseAdmin
+      .from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "admin");
+    if (cErr) throw new Error(cErr.message);
+    if ((count ?? 0) > 0) throw new Error("Un administrateur existe déjà. Demandez-lui de vous attribuer un rôle.");
+    const { error } = await supabaseAdmin.from("user_roles").insert({ user_id: context.userId, role: "admin" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const listTeam = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: users, error } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
+    if (error) throw new Error(error.message);
+    const { data: roles, error: rErr } = await supabaseAdmin.from("user_roles").select("user_id, role");
+    if (rErr) throw new Error(rErr.message);
+    const byUser = new Map<string, string[]>();
+    (roles ?? []).forEach((r: any) => {
+      const arr = byUser.get(r.user_id) ?? [];
+      arr.push(r.role);
+      byUser.set(r.user_id, arr);
+    });
+    return (users.users ?? []).map((u) => ({
+      id: u.id,
+      email: u.email ?? "",
+      created_at: u.created_at,
+      last_sign_in_at: u.last_sign_in_at ?? null,
+      roles: byUser.get(u.id) ?? [],
+    }));
+  });
+
+const roleMutInput = z.object({
+  user_id: z.string().uuid(),
+  role: z.enum(ROLE_VALUES),
+});
+
+export const assignRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => roleMutInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: data.user_id, role: data.role }, { onConflict: "user_id,role", ignoreDuplicates: true });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const removeRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => roleMutInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    if (data.user_id === context.userId && data.role === "admin") {
+      const { supabaseAdmin: sa } = await import("@/integrations/supabase/client.server");
+      const { count } = await sa.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "admin");
+      if ((count ?? 0) <= 1) throw new Error("Impossible : vous êtes le dernier administrateur.");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("user_roles").delete().eq("user_id", data.user_id).eq("role", data.role);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
