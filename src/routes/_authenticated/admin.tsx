@@ -4,7 +4,13 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { getMyRole, claimFirstAdmin } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
+import {
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
+  SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+  SidebarProvider, SidebarTrigger, useSidebar,
+} from "@/components/ui/sidebar";
 import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings, LogOut, Home, Users, ShieldCheck } from "lucide-react";
+
 import { supabase } from "@/integrations/supabase/client";
 import logoAsset from "@/assets/conetec-logo.png.asset.json";
 import { toast } from "sonner";
@@ -83,48 +89,90 @@ function AdminLayout() {
   }
 
 
-  return (
-    <div className="grid min-h-screen lg:grid-cols-[260px_1fr]">
-      <aside className="hidden border-r bg-card lg:flex lg:flex-col">
-        <div className="border-b p-4">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logoAsset.url} alt="CONETEC" className="h-9 w-auto" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</span>
-          </Link>
-        </div>
-        <nav className="flex-1 space-y-1 p-3">
-          {nav.map((n) => (
-            <Link
-              key={n.to}
-              to={n.to}
-              activeOptions={{ exact: n.exact }}
-              activeProps={{ className: "bg-gradient-brand text-brand-foreground" }}
-              inactiveProps={{ className: "hover:bg-secondary text-foreground/80" }}
-              className="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition"
-            >
-              <n.icon className="size-4" /> {n.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="space-y-1 border-t p-3">
-          <Button asChild variant="ghost" size="sm" className="w-full justify-start">
-            <Link to="/"><Home className="mr-2 size-4" /> Voir le site</Link>
-          </Button>
-          <Button onClick={signOut} variant="ghost" size="sm" className="w-full justify-start text-destructive hover:text-destructive">
-            <LogOut className="mr-2 size-4" /> Déconnexion
-          </Button>
-        </div>
-      </aside>
+  return <AdminShell signOut={signOut} />;
+}
 
-      <div className="flex flex-col">
-        <header className="flex items-center justify-between border-b bg-card px-4 py-3 lg:hidden">
-          <Link to="/admin"><img src={logoAsset.url} alt="CONETEC" className="h-8 w-auto" /></Link>
-          <Button onClick={signOut} variant="ghost" size="sm"><LogOut className="size-4" /></Button>
-        </header>
-        <main className="flex-1 bg-secondary/30 p-4 sm:p-6 lg:p-8">
-          <Outlet />
-        </main>
+function AdminShell({ signOut }: { signOut: () => void }) {
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-secondary/30">
+        <AdminSidebar signOut={signOut} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-30 flex items-center gap-2 border-b bg-card/95 px-3 py-2 backdrop-blur sm:px-4">
+            <SidebarTrigger />
+            <Link to="/admin" className="flex items-center gap-2">
+              <img src={logoAsset.url} alt="CONETEC" className="h-11 w-auto" />
+              <span className="hidden text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:inline">Admin</span>
+            </Link>
+            <div className="ml-auto flex items-center gap-1">
+              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <Link to="/"><Home className="mr-1.5 size-4" /> Site</Link>
+              </Button>
+              <Button onClick={signOut} variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                <LogOut className="size-4 sm:mr-1.5" /> <span className="hidden sm:inline">Déconnexion</span>
+              </Button>
+            </div>
+          </header>
+          <main className="flex-1 p-4 sm:p-6 lg:p-8">
+            <Outlet />
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
+
+function AdminSidebar({ signOut }: { signOut: () => void }) {
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
+  return (
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="border-b p-3">
+        <Link to="/" className="flex items-center gap-2">
+          <img src={logoAsset.url} alt="CONETEC" className="h-10 w-auto shrink-0" />
+          {!collapsed && (
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</span>
+          )}
+        </Link>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Gestion</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {nav.map((n) => (
+                <SidebarMenuItem key={n.to}>
+                  <SidebarMenuButton asChild tooltip={n.label}>
+                    <Link
+                      to={n.to}
+                      activeOptions={{ exact: n.exact }}
+                      activeProps={{ className: "bg-gradient-brand text-brand-foreground hover:!bg-gradient-brand hover:!text-brand-foreground" }}
+                    >
+                      <n.icon className="size-4" />
+                      <span>{n.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter className="border-t p-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild tooltip="Voir le site">
+              <Link to="/"><Home className="size-4" /><span>Voir le site</span></Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={signOut} tooltip="Déconnexion" className="text-destructive hover:text-destructive">
+              <LogOut className="size-4" /><span>Déconnexion</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
+
