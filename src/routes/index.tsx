@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -7,6 +9,9 @@ import {
 } from "lucide-react";
 import logoAsset from "@/assets/conetec-logo.png.asset.json";
 import heroImg from "@/assets/hero-electrician.jpg";
+import { listProducts } from "@/lib/catalog.functions";
+import { formatUSD } from "@/lib/format";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
