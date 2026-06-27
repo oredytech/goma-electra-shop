@@ -2,9 +2,9 @@ import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-rout
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
-import { getMyRole } from "@/lib/admin.functions";
+import { getMyRole, claimFirstAdmin } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings, LogOut, Home } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings, LogOut, Home, Users, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logoAsset from "@/assets/conetec-logo.png.asset.json";
 import { toast } from "sonner";
@@ -18,9 +18,11 @@ const nav = [
   { to: "/admin/products", label: "Produits", icon: Package },
   { to: "/admin/orders", label: "Commandes", icon: ShoppingCart },
   { to: "/admin/stock", label: "Stock", icon: Warehouse },
+  { to: "/admin/team", label: "Équipe & rôles", icon: Users },
   { to: "/admin/reports", label: "Rapports", icon: BarChart3 },
   { to: "/admin/settings", label: "Paramètres", icon: Settings },
 ];
+
 
 function AdminLayout() {
   const navigate = useNavigate();
