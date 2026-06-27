@@ -4,7 +4,13 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { getMyRole, claimFirstAdmin } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
+import {
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
+  SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+  SidebarProvider, SidebarTrigger, useSidebar,
+} from "@/components/ui/sidebar";
 import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings, LogOut, Home, Users, ShieldCheck } from "lucide-react";
+
 import { supabase } from "@/integrations/supabase/client";
 import logoAsset from "@/assets/conetec-logo.png.asset.json";
 import { toast } from "sonner";
