@@ -49,6 +49,13 @@ const steps = [
 ];
 
 function HomePage() {
+  const fProducts = useServerFn(listProducts);
+  const products = useQuery({
+    queryKey: ["home-products"],
+    queryFn: () => fProducts({ data: { limit: 8 } }),
+  });
+  const items = products.data ?? [];
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* NAV */}
