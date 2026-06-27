@@ -27,18 +27,22 @@ const nav = [
 function AdminLayout() {
   const navigate = useNavigate();
   const fetchRole = useServerFn(getMyRole);
+  const fClaim = useServerFn(claimFirstAdmin);
   const role = useQuery({ queryKey: ["my-role"], queryFn: () => fetchRole() });
-
-  useEffect(() => {
-    if (role.isSuccess && !role.data.isStaff) {
-      toast.error("Accès refusé : vous n'êtes pas membre du staff");
-      navigate({ to: "/" });
-    }
-  }, [role.isSuccess, role.data, navigate]);
 
   async function signOut() {
     await supabase.auth.signOut();
     navigate({ to: "/auth" });
+  }
+
+  async function claim() {
+    try {
+      await fClaim();
+      toast.success("Bravo ! Vous êtes administrateur.");
+      role.refetch();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erreur");
+    }
   }
 
   if (role.isLoading) return <div className="grid min-h-screen place-items-center text-muted-foreground">Chargement…</div>;
@@ -47,14 +51,37 @@ function AdminLayout() {
       <div>
         <h2 className="text-xl font-semibold">Accès impossible</h2>
         <p className="mt-1 text-muted-foreground">{(role.error as Error).message}</p>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Aucun rôle n'est encore assigné. Connectez-vous à Lovable Cloud et insérez votre user_id dans la table <code>user_roles</code> avec le rôle <code>admin</code>.
-        </p>
         <Button asChild className="mt-4"><Link to="/">Retour</Link></Button>
       </div>
     </div>
   );
-  if (!role.data?.isStaff) return null;
+
+  if (!role.data?.isStaff) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-secondary/30 p-8">
+        <div className="max-w-md rounded-2xl border bg-card p-8 text-center shadow-brand">
+          <div className="mx-auto grid size-14 place-items-center rounded-xl bg-gradient-brand text-brand-foreground">
+            <ShieldCheck className="size-7" />
+          </div>
+          <h2 className="mt-4 text-xl font-bold">Accès administrateur</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Aucun rôle ne vous est attribué. Si vous êtes le propriétaire de la boutique
+            et qu'aucun administrateur n'existe encore, cliquez ci-dessous pour devenir
+            le premier administrateur. Sinon, contactez l'administrateur de la boutique
+            pour qu'il vous attribue un rôle depuis « Équipe & rôles ».
+          </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <Button onClick={claim} className="bg-gradient-brand text-brand-foreground">
+              <ShieldCheck className="mr-2 size-4" /> Devenir le premier admin
+            </Button>
+            <Button asChild variant="outline"><Link to="/">Retour au site</Link></Button>
+            <Button onClick={signOut} variant="ghost"><LogOut className="mr-2 size-4" /> Déconnexion</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[260px_1fr]">
