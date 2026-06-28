@@ -202,9 +202,30 @@ function AdminProducts() {
               <div><Label>Stock min</Label><Input type="number" value={form.min_stock} onChange={(e) => setForm((f) => ({ ...f, min_stock: +e.target.value }))} /></div>
             </div>
             <div>
-              <Label>URL de l'image</Label>
-              <Input type="url" placeholder="https://..." value={form.image_url} onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))} />
+              <Label>Image du produit</Label>
+              <div className="mt-1 flex flex-wrap items-center gap-3">
+                {form.image_url ? (
+                  <img src={form.image_url} alt="" className="size-20 rounded-md border object-cover" />
+                ) : (
+                  <div className="grid size-20 place-items-center rounded-md border border-dashed text-xs text-muted-foreground">Aucune</div>
+                )}
+                <div className="flex flex-col gap-2">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border bg-secondary px-3 py-1.5 text-sm hover:bg-secondary/70">
+                    {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+                    <span>{uploading ? "Téléversement…" : "Choisir une image"}</span>
+                    <input type="file" accept="image/*" className="hidden" disabled={uploading}
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.currentTarget.value = ""; }} />
+                  </label>
+                  {form.image_url && (
+                    <Button type="button" variant="ghost" size="sm" className="h-7 self-start text-xs text-destructive"
+                      onClick={() => setForm((f) => ({ ...f, image_url: "" }))}>Retirer</Button>
+                  )}
+                </div>
+              </div>
+              <Input type="url" placeholder="…ou collez une URL https://" className="mt-2"
+                value={form.image_url} onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))} />
             </div>
+
             <div className="flex items-center gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))} />
               <Label>Produit actif (visible en boutique)</Label>
