@@ -9,7 +9,10 @@ import {
   SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarProvider, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings, LogOut, Home, Users, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings, LogOut, Home, Users, ShieldCheck, Zap } from "lucide-react";
+import { useState } from "react";
+import { DirectSaleDialog } from "@/components/DirectSaleDialog";
+
 
 import { supabase } from "@/integrations/supabase/client";
 import logoAsset from "@/assets/conetec-logo.png.asset.json";
