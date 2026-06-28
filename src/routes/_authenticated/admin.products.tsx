@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { listCategories } from "@/lib/catalog.functions";
-import { listProductsAdmin, upsertProduct, deleteProduct } from "@/lib/admin.functions";
+import { listProductsAdmin, upsertProduct, deleteProduct, uploadProductImage } from "@/lib/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
