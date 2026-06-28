@@ -348,3 +348,83 @@ export const removeRole = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// -------- DIRECT SALE (vente comptoir) --------
+const directSaleInput = z.object({
+  customer_name: z.string().trim().max(120).optional().or(z.literal("")),
+  customer_phone: z.string().trim().max(20).optional().or(z.literal("")),
+  payment_method: z.enum(["cash", "mobile_money", "card"]).default("cash"),
+  items: z.array(z.object({
+    product_id: z.string().uuid(),
+    quantity: z.number().int().min(1).max(999),
+  })).min(1).max(50),
+});
+
+export const createDirectSale = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => directSaleInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertStaff(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const ids = data.items.map((i) => i.product_id);
+    const { data: products, error: pErr } = await supabaseAdmin
+      .from("products").select("id, name, price_usd, stock, is_active").in("id", ids);
+    if (pErr) throw new Error(pErr.message);
+    let subtotal = 0;
+    const lines = data.items.map((i) => {
+      const p = products?.find((x) => x.id === i.product_id);
+      if (!p || !p.is_active) throw new Error("Produit indisponible");
+      if (p.stock < i.quantity) throw new Error(`Stock insuffisant pour ${p.name}`);
+      const unit = Number(p.price_usd);
+      const total = unit * i.quantity;
+      subtotal += total;
+      return { product_id: p.id, name_snapshot: p.name, unit_price: unit, quantity: i.quantity, line_total: total };
+    });
+    const { data: settings } = await supabaseAdmin
+      .from("shop_settings").select("default_currency").eq("id", true).maybeSingle();
+    const currency = settings?.default_currency ?? "USD";
+    const { data: order, error: oErr } = await supabaseAdmin.from("orders").insert({
+      customer_name: data.customer_name?.trim() || "Client comptoir",
+      customer_phone: data.customer_phone?.trim() || "—",
+      delivery_address: "Boutique CONETEC – Av. OSSO 18, Virunga",
+      neighborhood: "Virunga (comptoir)",
+      subtotal, delivery_fee: 0, total: subtotal, currency,
+      status: "paid", channel: "in_store",
+      payment_method: data.payment_method,
+      paid_at: new Date().toISOString(),
+    }).select("id, order_number, total, currency").single();
+    if (oErr || !order) throw new Error(oErr?.message ?? "Erreur création vente");
+    const { error: iErr } = await supabaseAdmin
+      .from("order_items").insert(lines.map((l) => ({ ...l, order_id: order.id })));
+    if (iErr) throw new Error(iErr.message);
+    // Trigger handle_order_paid creates invoice + deducts stock automatically.
+    return { orderId: order.id, orderNumber: order.order_number, total: Number(order.total), currency: order.currency };
+  });
+
+// -------- IMAGE UPLOAD --------
+const uploadInput = z.object({
+  filename: z.string().min(1).max(160),
+  contentType: z.string().min(3).max(80),
+  // base64 (without data: prefix), max ~4MB
+  base64: z.string().min(10).max(6_000_000),
+});
+
+export const uploadProductImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => uploadInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertStaff(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const ext = (data.filename.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const path = `${context.userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const buf = Buffer.from(data.base64, "base64");
+    const { error: upErr } = await supabaseAdmin.storage
+      .from("product-images")
+      .upload(path, buf, { contentType: data.contentType, upsert: false });
+    if (upErr) throw new Error(upErr.message);
+    // 10-year signed URL
+    const { data: signed, error: sErr } = await supabaseAdmin.storage
+      .from("product-images").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+    if (sErr || !signed) throw new Error(sErr?.message ?? "Signed URL error");
+    return { url: signed.signedUrl, path };
+  });
+
