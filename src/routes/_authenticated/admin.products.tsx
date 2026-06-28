@@ -38,6 +38,8 @@ function AdminProducts() {
   const fCats = useServerFn(listCategories);
   const fSave = useServerFn(upsertProduct);
   const fDel = useServerFn(deleteProduct);
+  const fUpload = useServerFn(uploadProductImage);
+
 
   const prods = useQuery({ queryKey: ["admin-products"], queryFn: () => fList() });
   const cats = useQuery({ queryKey: ["categories"], queryFn: () => fCats() });
