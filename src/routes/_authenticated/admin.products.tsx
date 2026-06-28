@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { listCategories } from "@/lib/catalog.functions";
-import { listProductsAdmin, upsertProduct, deleteProduct } from "@/lib/admin.functions";
+import { listProductsAdmin, upsertProduct, deleteProduct, uploadProductImage } from "@/lib/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, Loader2 } from "lucide-react";
 import { formatUSD } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -38,6 +38,8 @@ function AdminProducts() {
   const fCats = useServerFn(listCategories);
   const fSave = useServerFn(upsertProduct);
   const fDel = useServerFn(deleteProduct);
+  const fUpload = useServerFn(uploadProductImage);
+
 
   const prods = useQuery({ queryKey: ["admin-products"], queryFn: () => fList() });
   const cats = useQuery({ queryKey: ["categories"], queryFn: () => fCats() });
@@ -45,6 +47,25 @@ function AdminProducts() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(file: File) {
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) { toast.error("Image trop volumineuse (max 4 Mo)"); return; }
+    setUploading(true);
+    try {
+      const buf = await file.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      let bin = ""; for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
+      const base64 = btoa(bin);
+      const res = await fUpload({ data: { filename: file.name, contentType: file.type || "image/jpeg", base64 } });
+      setForm((f) => ({ ...f, image_url: res.url }));
+      toast.success("Image téléversée");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erreur d'upload");
+    } finally { setUploading(false); }
+  }
+
 
   function openCreate() { setForm(emptyForm); setOpen(true); }
   function openEdit(p: any) {
@@ -181,9 +202,30 @@ function AdminProducts() {
               <div><Label>Stock min</Label><Input type="number" value={form.min_stock} onChange={(e) => setForm((f) => ({ ...f, min_stock: +e.target.value }))} /></div>
             </div>
             <div>
-              <Label>URL de l'image</Label>
-              <Input type="url" placeholder="https://..." value={form.image_url} onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))} />
+              <Label>Image du produit</Label>
+              <div className="mt-1 flex flex-wrap items-center gap-3">
+                {form.image_url ? (
+                  <img src={form.image_url} alt="" className="size-20 rounded-md border object-cover" />
+                ) : (
+                  <div className="grid size-20 place-items-center rounded-md border border-dashed text-xs text-muted-foreground">Aucune</div>
+                )}
+                <div className="flex flex-col gap-2">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border bg-secondary px-3 py-1.5 text-sm hover:bg-secondary/70">
+                    {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+                    <span>{uploading ? "Téléversement…" : "Choisir une image"}</span>
+                    <input type="file" accept="image/*" className="hidden" disabled={uploading}
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.currentTarget.value = ""; }} />
+                  </label>
+                  {form.image_url && (
+                    <Button type="button" variant="ghost" size="sm" className="h-7 self-start text-xs text-destructive"
+                      onClick={() => setForm((f) => ({ ...f, image_url: "" }))}>Retirer</Button>
+                  )}
+                </div>
+              </div>
+              <Input type="url" placeholder="…ou collez une URL https://" className="mt-2"
+                value={form.image_url} onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))} />
             </div>
+
             <div className="flex items-center gap-2">
               <Switch checked={form.is_active} onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))} />
               <Label>Produit actif (visible en boutique)</Label>

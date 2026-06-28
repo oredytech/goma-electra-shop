@@ -9,7 +9,10 @@ import {
   SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarProvider, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings, LogOut, Home, Users, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings, LogOut, Home, Users, ShieldCheck, Zap } from "lucide-react";
+import { useState } from "react";
+import { DirectSaleDialog } from "@/components/DirectSaleDialog";
+
 
 import { supabase } from "@/integrations/supabase/client";
 import logoAsset from "@/assets/conetec-logo.png.asset.json";
@@ -93,6 +96,7 @@ function AdminLayout() {
 }
 
 function AdminShell({ signOut }: { signOut: () => void }) {
+  const [saleOpen, setSaleOpen] = useState(false);
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-secondary/30">
@@ -105,6 +109,10 @@ function AdminShell({ signOut }: { signOut: () => void }) {
               <span className="hidden text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:inline">Admin</span>
             </Link>
             <div className="ml-auto flex items-center gap-1">
+              <Button onClick={() => setSaleOpen(true)} size="sm"
+                className="bg-gradient-brand text-brand-foreground shadow-brand">
+                <Zap className="size-4 sm:mr-1.5" /> <span className="hidden sm:inline">Vente directe</span>
+              </Button>
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
                 <Link to="/"><Home className="mr-1.5 size-4" /> Site</Link>
               </Button>
@@ -113,14 +121,16 @@ function AdminShell({ signOut }: { signOut: () => void }) {
               </Button>
             </div>
           </header>
-          <main className="flex-1 p-4 sm:p-6 lg:p-8">
+          <main className="flex-1 p-3 sm:p-5 lg:p-8">
             <Outlet />
           </main>
         </div>
       </div>
+      <DirectSaleDialog open={saleOpen} onOpenChange={setSaleOpen} />
     </SidebarProvider>
   );
 }
+
 
 function AdminSidebar({ signOut }: { signOut: () => void }) {
   const { state } = useSidebar();
