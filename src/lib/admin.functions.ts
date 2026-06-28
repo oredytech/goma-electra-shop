@@ -388,7 +388,7 @@ export const createDirectSale = createServerFn({ method: "POST" })
       delivery_address: "Boutique CONETEC – Av. OSSO 18, Virunga",
       neighborhood: "Virunga (comptoir)",
       subtotal, delivery_fee: 0, total: subtotal, currency,
-      status: "paid", channel: "in_store",
+      status: "paid", channel: "offline",
       payment_method: data.payment_method,
       paid_at: new Date().toISOString(),
     }).select("id, order_number, total, currency").single();
