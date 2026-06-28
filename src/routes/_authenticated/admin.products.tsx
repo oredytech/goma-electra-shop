@@ -47,6 +47,25 @@ function AdminProducts() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(file: File) {
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) { toast.error("Image trop volumineuse (max 4 Mo)"); return; }
+    setUploading(true);
+    try {
+      const buf = await file.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      let bin = ""; for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
+      const base64 = btoa(bin);
+      const res = await fUpload({ data: { filename: file.name, contentType: file.type || "image/jpeg", base64 } });
+      setForm((f) => ({ ...f, image_url: res.url }));
+      toast.success("Image téléversée");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erreur d'upload");
+    } finally { setUploading(false); }
+  }
+
 
   function openCreate() { setForm(emptyForm); setOpen(true); }
   function openEdit(p: any) {
