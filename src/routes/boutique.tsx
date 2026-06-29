@@ -56,11 +56,11 @@ function BoutiquePage() {
   const add = useCart((s) => s.add);
 
   function applySearch() {
-    nav({ search: (s) => ({ ...s, q: search || undefined }) });
+    nav({ search: (s: { cat?: string; q?: string }) => ({ ...s, q: search || undefined }) });
   }
 
   function pickCat(slug?: string) {
-    nav({ search: (s) => ({ ...s, cat: slug }) });
+    nav({ search: (s: { cat?: string; q?: string }) => ({ ...s, cat: slug }) });
     setCatDrawer(false);
   }
 
