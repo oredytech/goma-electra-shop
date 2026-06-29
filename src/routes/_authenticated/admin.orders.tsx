@@ -185,6 +185,9 @@ function AdminOrders() {
                     </Button>
                   );
                 })}
+                <Button size="sm" onClick={downloadPdf} className="ml-auto bg-gradient-brand text-brand-foreground">
+                  <FileDown className="mr-1.5 size-4" /> Télécharger la facture PDF
+                </Button>
               </div>
 
               {detail.data.invoice && (
