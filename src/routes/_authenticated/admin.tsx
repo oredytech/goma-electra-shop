@@ -9,10 +9,12 @@ import {
   SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarProvider, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings, LogOut, Home, Users, ShieldCheck, Zap } from "lucide-react";
+import {
+  LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings,
+  LogOut, Home, Users, ShieldCheck, Zap, Receipt, UserCog, Menu,
+} from "lucide-react";
 import { useState } from "react";
 import { DirectSaleDialog } from "@/components/DirectSaleDialog";
-
 
 import { supabase } from "@/integrations/supabase/client";
 import logoAsset from "@/assets/conetec-logo.png.asset.json";
@@ -22,16 +24,21 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-const nav = [
+const navGestion = [
   { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
   { to: "/admin/products", label: "Produits", icon: Package },
   { to: "/admin/orders", label: "Commandes", icon: ShoppingCart },
   { to: "/admin/stock", label: "Stock", icon: Warehouse },
-  { to: "/admin/team", label: "Équipe & rôles", icon: Users },
+];
+const navFinance = [
+  { to: "/admin/expenses", label: "Dépenses & loyer", icon: Receipt },
+  { to: "/admin/employees", label: "Employés & salaires", icon: UserCog },
   { to: "/admin/reports", label: "Rapports", icon: BarChart3 },
+];
+const navConfig = [
+  { to: "/admin/team", label: "Équipe & rôles", icon: Users },
   { to: "/admin/settings", label: "Paramètres", icon: Settings },
 ];
-
 
 function AdminLayout() {
   const navigate = useNavigate();
@@ -76,8 +83,7 @@ function AdminLayout() {
           <p className="mt-2 text-sm text-muted-foreground">
             Aucun rôle ne vous est attribué. Si vous êtes le propriétaire de la boutique
             et qu'aucun administrateur n'existe encore, cliquez ci-dessous pour devenir
-            le premier administrateur. Sinon, contactez l'administrateur de la boutique
-            pour qu'il vous attribue un rôle depuis « Équipe & rôles ».
+            le premier administrateur.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             <Button onClick={claim} className="bg-gradient-brand text-brand-foreground">
@@ -91,7 +97,6 @@ function AdminLayout() {
     );
   }
 
-
   return <AdminShell signOut={signOut} />;
 }
 
@@ -103,14 +108,15 @@ function AdminShell({ signOut }: { signOut: () => void }) {
         <AdminSidebar signOut={signOut} />
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 flex items-center gap-2 border-b bg-card/95 px-3 py-2 backdrop-blur sm:px-4">
-            <SidebarTrigger />
-            <Link to="/admin" className="flex items-center gap-2">
-              <img src={logoAsset.url} alt="CONETEC" className="h-11 w-auto" />
+            <SidebarTrigger className="size-9 shrink-0 border border-border bg-background shadow-sm hover:bg-secondary">
+              <Menu className="size-5" />
+            </SidebarTrigger>
+            <Link to="/admin" className="flex min-w-0 items-center gap-2">
+              <img src={logoAsset.url} alt="CONETEC" className="h-10 w-auto sm:h-11" />
               <span className="hidden text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:inline">Admin</span>
             </Link>
             <div className="ml-auto flex items-center gap-1">
-              <Button onClick={() => setSaleOpen(true)} size="sm"
-                className="bg-gradient-brand text-brand-foreground shadow-brand">
+              <Button onClick={() => setSaleOpen(true)} size="sm" className="bg-gradient-brand text-brand-foreground shadow-brand">
                 <Zap className="size-4 sm:mr-1.5" /> <span className="hidden sm:inline">Vente directe</span>
               </Button>
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
@@ -131,6 +137,31 @@ function AdminShell({ signOut }: { signOut: () => void }) {
   );
 }
 
+function NavSection({ label, items }: { label: string; items: { to: string; label: string; icon: any; exact?: boolean }[] }) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((n) => (
+            <SidebarMenuItem key={n.to}>
+              <SidebarMenuButton asChild tooltip={n.label}>
+                <Link
+                  to={n.to}
+                  activeOptions={{ exact: n.exact }}
+                  activeProps={{ className: "bg-gradient-brand text-brand-foreground hover:!bg-gradient-brand hover:!text-brand-foreground" }}
+                >
+                  <n.icon className="size-4" />
+                  <span>{n.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+}
 
 function AdminSidebar({ signOut }: { signOut: () => void }) {
   const { state } = useSidebar();
@@ -146,27 +177,9 @@ function AdminSidebar({ signOut }: { signOut: () => void }) {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Gestion</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {nav.map((n) => (
-                <SidebarMenuItem key={n.to}>
-                  <SidebarMenuButton asChild tooltip={n.label}>
-                    <Link
-                      to={n.to}
-                      activeOptions={{ exact: n.exact }}
-                      activeProps={{ className: "bg-gradient-brand text-brand-foreground hover:!bg-gradient-brand hover:!text-brand-foreground" }}
-                    >
-                      <n.icon className="size-4" />
-                      <span>{n.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <NavSection label="Gestion" items={navGestion} />
+        <NavSection label="Finances & RH" items={navFinance} />
+        <NavSection label="Configuration" items={navConfig} />
       </SidebarContent>
       <SidebarFooter className="border-t p-2">
         <SidebarMenu>
@@ -185,4 +198,3 @@ function AdminSidebar({ signOut }: { signOut: () => void }) {
     </Sidebar>
   );
 }
-

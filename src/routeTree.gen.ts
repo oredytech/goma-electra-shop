@@ -22,6 +22,8 @@ import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin.reports'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
+import { Route as AuthenticatedAdminExpensesRouteImport } from './routes/_authenticated/admin.expenses'
+import { Route as AuthenticatedAdminEmployeesRouteImport } from './routes/_authenticated/admin.employees'
 import { Route as ApiPublicWebhooksShwaryRouteImport } from './routes/api/public/webhooks/shwary'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -92,6 +94,18 @@ const AuthenticatedAdminOrdersRoute =
     path: '/orders',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminExpensesRoute =
+  AuthenticatedAdminExpensesRouteImport.update({
+    id: '/expenses',
+    path: '/expenses',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminEmployeesRoute =
+  AuthenticatedAdminEmployeesRouteImport.update({
+    id: '/employees',
+    path: '/employees',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicWebhooksShwaryRoute = ApiPublicWebhooksShwaryRouteImport.update({
   id: '/api/public/webhooks/shwary',
   path: '/api/public/webhooks/shwary',
@@ -104,6 +118,8 @@ export interface FileRoutesByFullPath {
   '/boutique': typeof BoutiqueRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/admin/employees': typeof AuthenticatedAdminEmployeesRoute
+  '/admin/expenses': typeof AuthenticatedAdminExpensesRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -118,6 +134,8 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/boutique': typeof BoutiqueRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/employees': typeof AuthenticatedAdminEmployeesRoute
+  '/admin/expenses': typeof AuthenticatedAdminExpensesRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -135,6 +153,8 @@ export interface FileRoutesById {
   '/boutique': typeof BoutiqueRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/admin/employees': typeof AuthenticatedAdminEmployeesRoute
+  '/_authenticated/admin/expenses': typeof AuthenticatedAdminExpensesRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -152,6 +172,8 @@ export interface FileRouteTypes {
     | '/boutique'
     | '/sitemap.xml'
     | '/admin'
+    | '/admin/employees'
+    | '/admin/expenses'
     | '/admin/orders'
     | '/admin/products'
     | '/admin/reports'
@@ -166,6 +188,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/boutique'
     | '/sitemap.xml'
+    | '/admin/employees'
+    | '/admin/expenses'
     | '/admin/orders'
     | '/admin/products'
     | '/admin/reports'
@@ -182,6 +206,8 @@ export interface FileRouteTypes {
     | '/boutique'
     | '/sitemap.xml'
     | '/_authenticated/admin'
+    | '/_authenticated/admin/employees'
+    | '/_authenticated/admin/expenses'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/reports'
@@ -294,6 +320,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/expenses': {
+      id: '/_authenticated/admin/expenses'
+      path: '/expenses'
+      fullPath: '/admin/expenses'
+      preLoaderRoute: typeof AuthenticatedAdminExpensesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/employees': {
+      id: '/_authenticated/admin/employees'
+      path: '/employees'
+      fullPath: '/admin/employees'
+      preLoaderRoute: typeof AuthenticatedAdminEmployeesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/webhooks/shwary': {
       id: '/api/public/webhooks/shwary'
       path: '/api/public/webhooks/shwary'
@@ -305,6 +345,8 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminEmployeesRoute: typeof AuthenticatedAdminEmployeesRoute
+  AuthenticatedAdminExpensesRoute: typeof AuthenticatedAdminExpensesRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
@@ -315,6 +357,8 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminEmployeesRoute: AuthenticatedAdminEmployeesRoute,
+  AuthenticatedAdminExpensesRoute: AuthenticatedAdminExpensesRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
@@ -349,13 +393,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
