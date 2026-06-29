@@ -102,11 +102,29 @@ export function DirectSaleDialog({ open, onOpenChange }: { open: boolean; onOpen
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(o) => { if (!o) closeAndReset(); else onOpenChange(true); }}>
       <DialogContent className="max-h-[92vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><ShoppingBag className="size-5" /> Vente directe (comptoir)</DialogTitle>
         </DialogHeader>
+        {lastSale ? (
+          <div className="space-y-4 text-center">
+            <div className="mx-auto grid size-14 place-items-center rounded-full bg-accent/15 text-accent">
+              <ShoppingBag className="size-7" />
+            </div>
+            <div>
+              <div className="text-xl font-bold">Vente {lastSale.number}</div>
+              <div className="text-sm text-muted-foreground">Total encaissé : <strong>{formatUSD(lastSale.total)}</strong></div>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button onClick={downloadLastInvoice} className="bg-gradient-brand text-brand-foreground">
+                <FileDown className="mr-1.5 size-4" /> Télécharger la facture PDF
+              </Button>
+              <Button variant="outline" onClick={() => { setLastSale(null); }}>Nouvelle vente</Button>
+              <Button variant="ghost" onClick={closeAndReset}>Fermer</Button>
+            </div>
+          </div>
+        ) : (
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <div className="relative">
