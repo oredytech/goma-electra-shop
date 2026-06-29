@@ -62,14 +62,43 @@ export function DirectSaleDialog({ open, onOpenChange }: { open: boolean; onOpen
         },
       });
       toast.success(`Vente ${res.orderNumber} enregistrée — ${formatUSD(res.total)}`);
-      setCart({}); setCustomer({ name: "", phone: "" });
       qc.invalidateQueries({ queryKey: ["admin-orders"] });
       qc.invalidateQueries({ queryKey: ["admin-products"] });
       qc.invalidateQueries({ queryKey: ["inventory-moves"] });
-      onOpenChange(false);
+      setLastSale({ id: res.orderId, number: res.orderNumber, total: Number(res.total) });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erreur");
     } finally { setSaving(false); }
+  }
+
+  async function downloadLastInvoice() {
+    if (!lastSale) return;
+    try {
+      const d = await fDetail({ data: { id: lastSale.id } });
+      const s = settings.data;
+      downloadInvoicePDF(
+        {
+          invoiceNumber: d.invoice?.invoice_number ?? null,
+          orderNumber: d.order!.order_number,
+          issuedAt: d.invoice?.issued_at ?? d.order!.created_at,
+          customer: {
+            name: d.order!.customer_name, phone: d.order!.customer_phone,
+            email: d.order!.customer_email, neighborhood: d.order!.neighborhood,
+            address: d.order!.delivery_address,
+          },
+          items: d.items as never,
+          subtotal: d.order!.subtotal, deliveryFee: d.order!.delivery_fee,
+          total: d.order!.total, currency: d.order!.currency,
+          paymentMethod: d.order!.payment_method, status: d.order!.status,
+        },
+        { name: s?.shop_name ?? "CONETEC", tagline: s?.shop_tagline, address: s?.address_line, city: s?.city, country: s?.country, phone: s?.contact_phone, email: s?.contact_email },
+      );
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Erreur PDF"); }
+  }
+
+  function closeAndReset() {
+    setCart({}); setCustomer({ name: "", phone: "" }); setLastSale(null);
+    onOpenChange(false);
   }
 
   return (
