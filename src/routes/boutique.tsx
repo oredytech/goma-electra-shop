@@ -4,14 +4,16 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { z } from "zod";
 import { listCategories, listProducts } from "@/lib/catalog.functions";
-import { ShopHeader } from "@/components/ShopHeader";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useCart } from "@/lib/cart";
 import { formatUSD } from "@/lib/format";
-import { Search, ShoppingBag, Package, Plus } from "lucide-react";
+import { Search, ShoppingBag, Package, SlidersHorizontal, X } from "lucide-react";
 import { toast } from "sonner";
 
 const searchSchema = z.object({
@@ -40,6 +42,7 @@ function BoutiquePage() {
   const { cat, q } = useSearch({ from: "/boutique" });
   const nav = useNavigate({ from: "/boutique" });
   const [search, setSearch] = useState(q ?? "");
+  const [catDrawer, setCatDrawer] = useState(false);
 
   const fetchCats = useServerFn(listCategories);
   const fetchProds = useServerFn(listProducts);
@@ -53,15 +56,81 @@ function BoutiquePage() {
   const add = useCart((s) => s.add);
 
   function applySearch() {
-    nav({ search: (s: { cat?: string; q?: string }) => ({ ...s, q: search || undefined }) });
+    nav({ search: (s) => ({ ...s, q: search || undefined }) });
   }
+
+  function pickCat(slug?: string) {
+    nav({ search: (s) => ({ ...s, cat: slug }) });
+    setCatDrawer(false);
+  }
+
+  const activeCatName = cat ? (cats.data?.find((c) => c.slug === cat)?.name ?? cat) : "Toutes catégories";
 
   return (
     <div className="min-h-screen bg-background">
-      <ShopHeader />
+      <SiteHeader />
 
-      <section className="border-b bg-gradient-hero text-white">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+      {/* MOBILE: hero minimal (titre + recherche) */}
+      <section className="border-b bg-gradient-hero text-white lg:hidden">
+        <div className="px-4 py-5">
+          <h1 className="text-xl font-bold">Boutique</h1>
+          <form
+            onSubmit={(e) => { e.preventDefault(); applySearch(); }}
+            className="mt-3 flex items-center gap-2"
+          >
+            <div className="relative min-w-0 flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher…"
+                className="h-10 border-white/30 bg-white pl-9 text-foreground"
+              />
+            </div>
+            <Sheet open={catDrawer} onOpenChange={setCatDrawer}>
+              <SheetTrigger asChild>
+                <Button type="button" variant="outline" size="icon" className="shrink-0 border-white/40 bg-white/10 text-white hover:bg-white/20">
+                  <SlidersHorizontal className="size-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[85vw] max-w-xs bg-background">
+                <SheetHeader><SheetTitle>Catégories</SheetTitle></SheetHeader>
+                <div className="mt-4 space-y-1">
+                  <button
+                    onClick={() => pickCat(undefined)}
+                    className={`w-full rounded-md px-3 py-2.5 text-left text-sm transition ${!cat ? "bg-gradient-brand text-brand-foreground" : "hover:bg-secondary"}`}
+                  >
+                    Toutes ({cats.data?.length ?? 0})
+                  </button>
+                  {cats.data?.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => pickCat(c.slug)}
+                      className={`w-full rounded-md px-3 py-2.5 text-left text-sm transition ${cat === c.slug ? "bg-gradient-brand text-brand-foreground" : "hover:bg-secondary"}`}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </form>
+          {cat && (
+            <div className="mt-3">
+              <button
+                onClick={() => pickCat(undefined)}
+                className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-xs text-white"
+              >
+                {activeCatName} <X className="size-3" />
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* DESKTOP: bandeau classique */}
+      <section className="hidden border-b bg-gradient-hero text-white lg:block">
+        <div className="mx-auto max-w-7xl px-6 py-12">
           <h1 className="text-3xl font-bold sm:text-4xl">Boutique CONETEC</h1>
           <p className="mt-1 text-white/80">Équipements électroniques — livraison à Goma</p>
           <div className="mt-6 flex max-w-2xl gap-2">
@@ -80,13 +149,13 @@ function BoutiquePage() {
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[240px_1fr]">
-        {/* Sidebar categories */}
-        <aside>
+      <div className="mx-auto grid max-w-7xl gap-6 px-3 py-6 sm:px-6 sm:py-10 lg:grid-cols-[240px_1fr] lg:gap-8">
+        {/* Sidebar desktop */}
+        <aside className="hidden lg:block">
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Catégories</h3>
           <div className="space-y-1">
             <button
-              onClick={() => nav({ search: (s: { cat?: string; q?: string }) => ({ ...s, cat: undefined }) })}
+              onClick={() => pickCat(undefined)}
               className={`w-full rounded-md px-3 py-2 text-left text-sm transition ${!cat ? "bg-gradient-brand text-brand-foreground" : "hover:bg-secondary"}`}
             >
               Toutes ({cats.data?.length ?? 0})
@@ -94,7 +163,7 @@ function BoutiquePage() {
             {cats.data?.map((c) => (
               <button
                 key={c.id}
-                onClick={() => nav({ search: (s: { cat?: string; q?: string }) => ({ ...s, cat: c.slug }) })}
+                onClick={() => pickCat(c.slug)}
                 className={`w-full rounded-md px-3 py-2 text-left text-sm transition ${cat === c.slug ? "bg-gradient-brand text-brand-foreground" : "hover:bg-secondary"}`}
               >
                 {c.name}
@@ -103,36 +172,38 @@ function BoutiquePage() {
           </div>
         </aside>
 
-        {/* Products grid */}
-        <div>
-          {prods.isLoading && <div className="py-20 text-center text-muted-foreground">Chargement…</div>}
+        {/* Products */}
+        <div className="min-w-0">
+          {prods.isLoading && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, i) => <Card key={i} className="h-64 animate-pulse bg-muted/40" />)}
+            </div>
+          )}
           {prods.data && prods.data.length === 0 && (
             <Card className="p-10 text-center">
               <Package className="mx-auto size-12 text-muted-foreground/40" />
               <h3 className="mt-3 text-lg font-semibold">Aucun produit</h3>
               <p className="text-sm text-muted-foreground">
-                {q ? "Aucun résultat. Essayez d'autres mots-clés." : "Le catalogue sera bientôt rempli. L'admin peut ajouter des produits depuis /admin/products."}
+                {q ? "Aucun résultat. Essayez d'autres mots-clés." : "Le catalogue sera bientôt rempli."}
               </p>
             </Card>
           )}
           {prods.data && prods.data.length > 0 && (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
               {prods.data.map((p) => (
                 <Card key={p.id} className="group flex flex-col overflow-hidden p-0 transition hover:shadow-brand">
                   <div className="aspect-square overflow-hidden bg-secondary">
                     {p.image_url ? (
                       <img src={p.image_url} alt={p.name} className="size-full object-cover transition group-hover:scale-105" loading="lazy" />
                     ) : (
-                      <div className="grid size-full place-items-center text-muted-foreground/30">
-                        <Package className="size-12" />
-                      </div>
+                      <div className="grid size-full place-items-center text-muted-foreground/30"><Package className="size-12" /></div>
                     )}
                   </div>
-                  <div className="flex flex-1 flex-col p-3">
-                    {p.categories && <Badge variant="secondary" className="mb-1.5 w-fit text-[10px]">{(p.categories as any).name}</Badge>}
+                  <div className="flex flex-1 flex-col p-2.5 sm:p-3">
+                    {p.categories && <Badge variant="secondary" className="mb-1.5 w-fit text-[10px]">{p.categories.name}</Badge>}
                     <h3 className="line-clamp-2 text-sm font-semibold">{p.name}</h3>
                     <div className="mt-1 text-base font-bold text-brand">{formatUSD(p.price_usd)}</div>
-                    <div className="mt-1 text-xs text-muted-foreground">
+                    <div className="mt-0.5 text-xs text-muted-foreground">
                       {p.stock > 0 ? `${p.stock} en stock` : <span className="text-destructive">Rupture</span>}
                     </div>
                     <Button
@@ -156,6 +227,8 @@ function BoutiquePage() {
           )}
         </div>
       </div>
+
+      <SiteFooter />
     </div>
   );
 }

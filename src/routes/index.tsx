@@ -3,15 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
-  Wrench, Zap, Wifi, Antenna, ShieldCheck, Truck, Phone, MapPin,
-  Mail, ShoppingBag, ArrowRight, CheckCircle2, Package
+  Wrench, Zap, Wifi, Antenna, ShieldCheck, Truck, Package,
+  Search, ArrowRight, CheckCircle2,
 } from "lucide-react";
-import logoAsset from "@/assets/conetec-logo.png.asset.json";
 import heroImg from "@/assets/hero-electrician.jpg";
-import { listProducts } from "@/lib/catalog.functions";
+import { listProducts, listCategories } from "@/lib/catalog.functions";
 import { formatUSD } from "@/lib/format";
-
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
+import { useState } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,174 +30,170 @@ export const Route = createFileRoute("/")({
 const services = [
   { icon: Zap, title: "Installation électrique", desc: "Domestique & industrielle, aux normes." },
   { icon: Wrench, title: "Maintenance & dépannage", desc: "Électrique et électronique, intervention rapide." },
-  { icon: Antenna, title: "Installation d'antennes", desc: "TV, satellite, parabole — réglages compris." },
+  { icon: Antenna, title: "Installation d'antennes", desc: "TV, satellite, parabole." },
   { icon: Wifi, title: "Connexion Internet", desc: "Installation & configuration réseau / Wi-Fi." },
 ];
 
-const categories = [
-  { name: "Câblage & accessoires", count: "120+ produits" },
-  { name: "Disjoncteurs & tableaux", count: "80+ produits" },
-  { name: "Antennes & récepteurs", count: "45+ produits" },
-  { name: "Routeurs & réseau", count: "60+ produits" },
-  { name: "Outils d'électricien", count: "90+ produits" },
-  { name: "Éclairage LED", count: "150+ produits" },
-];
+const popularTags = ["câble électrique", "disjoncteur", "antenne TV", "routeur Wi-Fi", "ampoule LED"];
 
 const steps = [
   { n: "1", t: "Choisissez", d: "Parcourez le catalogue et cliquez sur « Acheter »." },
-  { n: "2", t: "Renseignez la livraison", d: "Nom, téléphone, quartier à Goma." },
-  { n: "3", t: "Payez par Mobile Money", d: "Paiement sécurisé via Shwary." },
-  { n: "4", t: "Recevez chez vous", d: "Livraison à Goma + facture par email." },
+  { n: "2", t: "Livraison", d: "Nom, téléphone, quartier à Goma." },
+  { n: "3", t: "Mobile Money", d: "Paiement sécurisé via Shwary." },
+  { n: "4", t: "Recevez", d: "Livraison à Goma + facture par email." },
 ];
 
 function HomePage() {
   const fProducts = useServerFn(listProducts);
-  const products = useQuery({
-    queryKey: ["home-products"],
-    queryFn: () => fProducts({ data: { limit: 8 } }),
-  });
+  const fCats = useServerFn(listCategories);
+  const products = useQuery({ queryKey: ["home-products"], queryFn: () => fProducts({ data: { limit: 8 } }) });
+  const cats = useQuery({ queryKey: ["categories"], queryFn: () => fCats() });
   const items = products.data ?? [];
+  const [q, setQ] = useState("");
+
+  function go(e?: React.FormEvent) {
+    e?.preventDefault();
+    const search = q.trim();
+    if (search) window.location.href = `/boutique?q=${encodeURIComponent(search)}`;
+    else window.location.href = "/boutique";
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* NAV */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logoAsset.url} alt="CONETEC" className="h-10 w-auto" />
-          </Link>
-          <nav className="hidden items-center gap-7 text-sm font-medium md:flex">
-            <Link to="/boutique" className="text-foreground/70 hover:text-foreground">Boutique</Link>
-            <a href="#services" className="text-foreground/70 hover:text-foreground">Services</a>
-            <a href="#comment" className="text-foreground/70 hover:text-foreground">Comment ça marche</a>
-            <a href="#contact" className="text-foreground/70 hover:text-foreground">Contact</a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Link to="/auth">Se connecter</Link>
-            </Button>
-            <Button asChild size="sm" className="bg-gradient-brand text-brand-foreground shadow-accent hover:opacity-95">
-              <Link to="/boutique"><ShoppingBag className="mr-1.5 size-4" /> Boutique</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-hero text-white">
-        <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:28px_28px]" />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-20 sm:px-6 md:grid-cols-2 md:py-28">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wider">
-              <Zap className="size-3.5" /> Goma · RDC / Nord-Kivu
+      {/* HERO — style B2B sourcing */}
+      <section className="relative isolate overflow-hidden bg-[oklch(0.18_0.06_264)] text-white">
+        <img
+          src={heroImg}
+          alt="Équipe technique CONETEC"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-40"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[oklch(0.16_0.06_264)] via-[oklch(0.16_0.06_264)/0.85] to-[oklch(0.16_0.06_264)/0.3]" />
+
+        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:py-28">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider backdrop-blur">
+              <Zap className="size-3.5 text-accent" /> Goma · RDC
             </span>
-            <h1 className="mt-5 text-4xl font-bold leading-[1.05] sm:text-5xl md:text-6xl">
-              Équipements électroniques <br />
-              <span className="text-[oklch(0.85_0.08_188)]">& techniciens à domicile.</span>
+            <h1 className="mt-4 text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl lg:text-6xl">
+              ÉQUIPEMENTS<br />
+              <span className="text-accent">ÉLECTRONIQUES</span><br />
+              <span className="text-white/90">livrés à Goma.</span>
             </h1>
-            <p className="mt-5 max-w-xl text-lg text-white/85">
-              Achetez en ligne vos fournitures électroniques et faites appel à nos techniciens
-              pour l'installation, la maintenance, les antennes et la connexion internet.
-              Paiement <strong>Mobile Money</strong>, livraison partout à Goma.
+            <p className="mt-4 max-w-lg text-base text-white/80 sm:text-lg">
+              Achat en ligne + techniciens à domicile. Paiement Mobile Money.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="bg-white text-brand hover:bg-white/90">
-                <Link to="/boutique"><ShoppingBag className="mr-2 size-5" /> Voir la boutique</Link>
+
+            {/* Search bar */}
+            <form onSubmit={go} className="mt-7 flex w-full max-w-xl flex-wrap gap-2">
+              <div className="relative min-w-0 flex-1">
+                <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Rechercher : câble, disjoncteur, antenne…"
+                  className="h-12 rounded-full border-0 bg-white pl-12 pr-4 text-base text-foreground shadow-lg placeholder:text-muted-foreground"
+                />
+              </div>
+              <Button type="submit" size="lg" className="h-12 shrink-0 rounded-full bg-accent px-6 text-base font-semibold text-accent-foreground hover:bg-accent/90">
+                Rechercher
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/0 text-white hover:bg-white/10">
-                <a href="#services">Demander un technicien <ArrowRight className="ml-2 size-5" /></a>
-              </Button>
+            </form>
+
+            {/* Popular tags */}
+            <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-2 text-xs sm:text-sm">
+              <span className="text-white/60">Populaires :</span>
+              {popularTags.map((t) => (
+                <Link
+                  key={t}
+                  to="/boutique"
+                  search={{ q: t }}
+                  className="rounded-full border border-white/30 bg-white/5 px-3 py-1 text-white/90 transition hover:border-accent hover:bg-accent/20"
+                >
+                  {t}
+                </Link>
+              ))}
             </div>
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4 text-[oklch(0.85_0.08_188)]" /> Paiement Mobile Money</span>
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4 text-[oklch(0.85_0.08_188)]" /> Livraison à Goma</span>
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4 text-[oklch(0.85_0.08_188)]" /> Facture par email</span>
+
+            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/80 sm:text-sm">
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4 text-accent" /> Mobile Money</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4 text-accent" /> Livraison Goma</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4 text-accent" /> Facture par email</span>
             </div>
-          </div>
-          <div className="relative">
-            <div className="absolute -inset-4 rounded-3xl bg-white/10 blur-2xl" />
-            <img
-              src={heroImg}
-              alt="Technicien CONETEC installant un tableau électrique"
-              width={1600}
-              height={1200}
-              className="relative aspect-[4/3] w-full rounded-2xl object-cover shadow-brand ring-1 ring-white/20"
-            />
           </div>
         </div>
       </section>
 
       {/* TRUST BAR */}
-      <section className="border-y border-border bg-muted/40">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-6 sm:px-6 md:grid-cols-4">
+      <section className="border-b border-border bg-muted/40">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-5 sm:px-6 md:grid-cols-4">
           {[
             { i: Truck, t: "Livraison Goma", s: "Sous 24–48h" },
             { i: ShieldCheck, t: "Produits garantis", s: "Qualité contrôlée" },
-            { i: Phone, t: "Support 7j/7", s: "+243 …" },
-            { i: Package, t: "Retrait boutique", s: "Av. OSSO N°18, Virunga" },
+            { i: Wrench, t: "Techniciens", s: "Intervention rapide" },
+            { i: Package, t: "Boutique", s: "Av. OSSO N°18" },
           ].map((b) => (
-            <div key={b.t} className="flex items-center gap-3">
-              <div className="grid size-11 place-items-center rounded-xl bg-gradient-brand text-brand-foreground">
-                <b.i className="size-5" />
+            <div key={b.t} className="flex min-w-0 items-center gap-3">
+              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-brand text-brand-foreground">
+                <b.i className="size-4" />
               </div>
-              <div>
-                <div className="text-sm font-semibold">{b.t}</div>
-                <div className="text-xs text-muted-foreground">{b.s}</div>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-semibold">{b.t}</div>
+                <div className="truncate text-xs text-muted-foreground">{b.s}</div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* BOUTIQUE — catégories */}
-      <section id="boutique" className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-        <div className="mb-10 flex items-end justify-between gap-4">
-          <div>
-            <span className="text-sm font-semibold uppercase tracking-wider text-accent">Boutique en ligne</span>
-            <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Toutes nos catégories</h2>
-            <p className="mt-2 max-w-xl text-muted-foreground">
-              Parcourez nos rayons. Le catalogue complet sera ouvert à la mise en ligne du backend.
-            </p>
+      {/* CATEGORIES */}
+      <section id="categories" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
+            <span className="text-xs font-semibold uppercase tracking-wider text-accent">Boutique</span>
+            <h2 className="mt-1.5 text-2xl font-bold sm:text-3xl">Nos catégories</h2>
           </div>
-          <Button asChild variant="ghost" className="hidden sm:inline-flex">
+          <Button asChild variant="ghost" size="sm">
             <Link to="/boutique">Tout voir <ArrowRight className="ml-1.5 size-4" /></Link>
           </Button>
         </div>
-
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {categories.map((c) => (
-            <Card key={c.name} className="group cursor-pointer border-border p-4 transition hover:-translate-y-0.5 hover:border-accent hover:shadow-accent">
-              <div className="mb-3 grid size-11 place-items-center rounded-lg bg-secondary text-brand group-hover:bg-gradient-brand group-hover:text-brand-foreground">
-                <Package className="size-5" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {(cats.data ?? []).slice(0, 6).map((c) => (
+            <Link
+              key={c.id}
+              to="/boutique"
+              search={{ cat: c.slug }}
+              className="group rounded-xl border border-border bg-card p-3 transition hover:-translate-y-0.5 hover:border-accent hover:shadow-accent"
+            >
+              <div className="mb-2 grid size-10 place-items-center rounded-lg bg-secondary text-brand group-hover:bg-gradient-brand group-hover:text-brand-foreground">
+                <Package className="size-4" />
               </div>
               <div className="text-sm font-semibold leading-tight">{c.name}</div>
-              <div className="mt-1 text-xs text-muted-foreground">{c.count}</div>
-            </Card>
+            </Link>
           ))}
+          {(cats.data ?? []).length === 0 && (
+            <div className="col-span-full rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+              Aucune catégorie. Ajoutez-en depuis l'<Link to="/admin" className="font-semibold text-accent">administration</Link>.
+            </div>
+          )}
         </div>
       </section>
 
-      {/* PRODUITS EN VEDETTE */}
+      {/* PRODUITS */}
       <section className="bg-secondary/30">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <div className="mb-10 flex items-end justify-between gap-4">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
             <div>
-              <span className="text-sm font-semibold uppercase tracking-wider text-accent">Nos produits</span>
-              <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Derniers articles ajoutés</h2>
-              <p className="mt-2 max-w-xl text-muted-foreground">
-                Découvrez les produits récemment mis en boutique.
-              </p>
+              <span className="text-xs font-semibold uppercase tracking-wider text-accent">Produits</span>
+              <h2 className="mt-1.5 text-2xl font-bold sm:text-3xl">Derniers articles</h2>
             </div>
-            <Button asChild variant="ghost" className="hidden sm:inline-flex">
-              <Link to="/boutique">Voir la boutique <ArrowRight className="ml-1.5 size-4" /></Link>
-            </Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/boutique">Voir la boutique <ArrowRight className="ml-1.5 size-4" /></Link></Button>
           </div>
 
           {products.isLoading && (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <Card key={i} className="h-72 animate-pulse border-border bg-muted/40" />
-              ))}
+              {Array.from({ length: 8 }).map((_, i) => <Card key={i} className="h-64 animate-pulse border-border bg-muted/40" />)}
             </div>
           )}
 
@@ -208,7 +206,7 @@ function HomePage() {
 
           {items.length > 0 && (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {items.map((p: any) => (
+              {items.map((p) => (
                 <Link
                   key={p.id}
                   to="/boutique"
@@ -216,30 +214,17 @@ function HomePage() {
                 >
                   <div className="aspect-square w-full overflow-hidden bg-muted">
                     {p.image_url ? (
-                      <img
-                        src={p.image_url}
-                        alt={p.name}
-                        loading="lazy"
-                        className="size-full object-cover transition group-hover:scale-105"
-                      />
+                      <img src={p.image_url} alt={p.name} loading="lazy" className="size-full object-cover transition group-hover:scale-105" />
                     ) : (
-                      <div className="grid size-full place-items-center text-muted-foreground">
-                        <Package className="size-10" />
-                      </div>
+                      <div className="grid size-full place-items-center text-muted-foreground"><Package className="size-10" /></div>
                     )}
                   </div>
                   <div className="flex flex-1 flex-col p-3">
-                    {p.categories?.name && (
-                      <div className="text-[11px] font-medium uppercase tracking-wider text-accent">
-                        {p.categories.name}
-                      </div>
-                    )}
+                    {p.categories?.name && <div className="text-[11px] font-medium uppercase tracking-wider text-accent">{p.categories.name}</div>}
                     <div className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug">{p.name}</div>
                     <div className="mt-auto flex items-end justify-between pt-3">
                       <div className="text-base font-bold text-brand">{formatUSD(p.price_usd)}</div>
-                      <span className="text-xs text-muted-foreground">
-                        {p.stock > 0 ? "En stock" : "Rupture"}
-                      </span>
+                      <span className="text-xs text-muted-foreground">{p.stock > 0 ? "En stock" : "Rupture"}</span>
                     </div>
                   </div>
                 </Link>
@@ -249,25 +234,20 @@ function HomePage() {
         </div>
       </section>
 
-
-
       {/* SERVICES */}
-      <section id="services" className="bg-secondary/40">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <section id="services" className="bg-background">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
           <div className="mb-10 text-center">
-            <span className="text-sm font-semibold uppercase tracking-wider text-accent">Nos services</span>
-            <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Des techniciens qualifiés à votre porte</h2>
-            <p className="mx-auto mt-2 max-w-2xl text-muted-foreground">
-              Notre équipe intervient à Goma pour vos installations et dépannages.
-            </p>
+            <span className="text-xs font-semibold uppercase tracking-wider text-accent">Nos services</span>
+            <h2 className="mt-1.5 text-2xl font-bold sm:text-3xl">Techniciens qualifiés à votre porte</h2>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {services.map((s) => (
-              <Card key={s.title} className="border-border p-6 transition hover:shadow-brand">
-                <div className="mb-4 grid size-12 place-items-center rounded-xl bg-gradient-brand text-brand-foreground">
-                  <s.icon className="size-6" />
+              <Card key={s.title} className="border-border p-5 transition hover:shadow-brand">
+                <div className="mb-3 grid size-11 place-items-center rounded-xl bg-gradient-brand text-brand-foreground">
+                  <s.icon className="size-5" />
                 </div>
-                <h3 className="text-lg font-semibold">{s.title}</h3>
+                <h3 className="text-base font-semibold">{s.title}</h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">{s.desc}</p>
               </Card>
             ))}
@@ -275,77 +255,26 @@ function HomePage() {
         </div>
       </section>
 
-      {/* COMMENT ÇA MARCHE */}
-      <section id="comment" className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-        <div className="mb-10 text-center">
-          <span className="text-sm font-semibold uppercase tracking-wider text-accent">Comment ça marche</span>
-          <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Acheter en 4 étapes simples</h2>
-        </div>
-        <div className="grid gap-5 md:grid-cols-4">
-          {steps.map((s, i) => (
-            <div key={s.n} className="relative">
-              <Card className="h-full border-border p-6">
-                <div className="text-5xl font-bold text-gradient-brand">{s.n}</div>
-                <h3 className="mt-3 text-lg font-semibold">{s.t}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{s.d}</p>
+      {/* COMMENT */}
+      <section id="comment" className="bg-secondary/30">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
+          <div className="mb-10 text-center">
+            <span className="text-xs font-semibold uppercase tracking-wider text-accent">Comment ça marche</span>
+            <h2 className="mt-1.5 text-2xl font-bold sm:text-3xl">Acheter en 4 étapes</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {steps.map((s) => (
+              <Card key={s.n} className="border-border p-5">
+                <div className="text-4xl font-bold text-gradient-brand">{s.n}</div>
+                <h3 className="mt-2 text-base font-semibold">{s.t}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
               </Card>
-              {i < steps.length - 1 && (
-                <ArrowRight className="absolute -right-3 top-1/2 hidden size-6 -translate-y-1/2 text-accent md:block" />
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="bg-gradient-brand text-brand-foreground">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-14 sm:px-6 md:flex-row">
-          <div>
-            <h2 className="text-2xl font-bold sm:text-3xl">Besoin d'un devis ou d'un technicien ?</h2>
-            <p className="mt-1 text-white/80">Contactez-nous, on intervient partout à Goma.</p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild size="lg" className="bg-white text-brand hover:bg-white/90">
-              <a href="#contact"><Phone className="mr-2 size-5" /> Nous appeler</a>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10">
-              <Link to="/boutique">Voir la boutique</Link>
-            </Button>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CONTACT / FOOTER */}
-      <footer id="contact" className="border-t border-border bg-background">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
-          <div className="md:col-span-2">
-            <img src={logoAsset.url} alt="CONETEC" className="h-12 w-auto" />
-            <p className="mt-3 max-w-md text-sm text-muted-foreground">
-              CONETEC — Company of New Technology. Vente d'équipements électroniques
-              et services techniques à Goma, RDC.
-            </p>
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold">Adresse</h4>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li className="flex gap-2"><MapPin className="mt-0.5 size-4 shrink-0 text-accent" /> Quartier Virunga, Av. OSSO N°18, Goma, Nord-Kivu, RDC</li>
-              <li className="flex gap-2"><Phone className="mt-0.5 size-4 shrink-0 text-accent" /> +243 — à configurer</li>
-              <li className="flex gap-2"><Mail className="mt-0.5 size-4 shrink-0 text-accent" /> contact@conetec.cd</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold">Liens</h4>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/boutique" className="hover:text-foreground">Boutique</Link></li>
-              <li><a href="#services" className="hover:text-foreground">Services</a></li>
-              <li><a href="#comment" className="hover:text-foreground">Comment commander</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="border-t border-border py-5 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} CONETEC. Tous droits réservés.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
