@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          entity: string | null
+          entity_id: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          entity?: string | null
+          entity_id?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -40,6 +70,125 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      employees: {
+        Row: {
+          created_at: string
+          currency: string
+          email: string | null
+          full_name: string
+          hire_date: string | null
+          id: string
+          is_active: boolean
+          monthly_salary: number
+          notes: string | null
+          phone: string | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          email?: string | null
+          full_name: string
+          hire_date?: string | null
+          id?: string
+          is_active?: boolean
+          monthly_salary?: number
+          notes?: string | null
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          email?: string | null
+          full_name?: string
+          hire_date?: string | null
+          id?: string
+          is_active?: boolean
+          monthly_salary?: number
+          notes?: string | null
+          phone?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      expense_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          amount: number
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          expense_date: string
+          id: string
+          label: string
+          notes: string | null
+          payment_method: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          expense_date?: string
+          id?: string
+          label: string
+          notes?: string | null
+          payment_method?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          expense_date?: string
+          id?: string
+          label?: string
+          notes?: string | null
+          payment_method?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "expense_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       inventory_movements: {
         Row: {
@@ -329,39 +478,113 @@ export type Database = {
         }
         Relationships: []
       }
+      salary_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          employee_id: string
+          id: string
+          notes: string | null
+          paid_at: string | null
+          payment_method: string | null
+          period_month: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          period_month: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          period_month?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_payments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shop_settings: {
         Row: {
+          address_line: string | null
+          business_hours: string | null
+          city: string | null
           contact_email: string | null
           contact_phone: string | null
+          country: string | null
           default_currency: string
           delivery_fee: number
+          facebook_url: string | null
           id: boolean
+          shop_name: string | null
+          shop_tagline: string | null
           shwary_api_key: string | null
           shwary_merchant_id: string | null
           shwary_webhook_secret: string | null
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
+          address_line?: string | null
+          business_hours?: string | null
+          city?: string | null
           contact_email?: string | null
           contact_phone?: string | null
+          country?: string | null
           default_currency?: string
           delivery_fee?: number
+          facebook_url?: string | null
           id?: boolean
+          shop_name?: string | null
+          shop_tagline?: string | null
           shwary_api_key?: string | null
           shwary_merchant_id?: string | null
           shwary_webhook_secret?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
+          address_line?: string | null
+          business_hours?: string | null
+          city?: string | null
           contact_email?: string | null
           contact_phone?: string | null
+          country?: string | null
           default_currency?: string
           delivery_fee?: number
+          facebook_url?: string | null
           id?: boolean
+          shop_name?: string | null
+          shop_tagline?: string | null
           shwary_api_key?: string | null
           shwary_merchant_id?: string | null
           shwary_webhook_secret?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
