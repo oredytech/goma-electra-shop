@@ -189,6 +189,7 @@ export function DirectSaleDialog({ open, onOpenChange }: { open: boolean; onOpen
             </Button>
           </div>
         </div>
+        )}
       </DialogContent>
     </Dialog>
   );
