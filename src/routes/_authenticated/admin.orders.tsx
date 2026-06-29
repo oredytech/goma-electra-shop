@@ -3,13 +3,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { listOrders, getOrderDetail, updateOrderStatus } from "@/lib/admin.functions";
+import { getPublicSiteSettings } from "@/lib/site-settings.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatUSD, formatDateTime } from "@/lib/format";
+import { downloadInvoicePDF } from "@/lib/invoice-pdf";
 import { toast } from "sonner";
-import { Eye } from "lucide-react";
+import { Eye, FileDown } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({
   component: AdminOrders,
