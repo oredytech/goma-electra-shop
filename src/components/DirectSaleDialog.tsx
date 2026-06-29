@@ -1,13 +1,15 @@
 import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listProductsAdmin, createDirectSale } from "@/lib/admin.functions";
+import { listProductsAdmin, createDirectSale, getOrderDetail } from "@/lib/admin.functions";
+import { getPublicSiteSettings } from "@/lib/site-settings.functions";
+import { downloadInvoicePDF } from "@/lib/invoice-pdf";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus, Trash2, Search, ShoppingBag } from "lucide-react";
+import { Plus, Minus, Trash2, Search, ShoppingBag, FileDown } from "lucide-react";
 import { formatUSD } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -15,12 +17,16 @@ export function DirectSaleDialog({ open, onOpenChange }: { open: boolean; onOpen
   const qc = useQueryClient();
   const fList = useServerFn(listProductsAdmin);
   const fSell = useServerFn(createDirectSale);
+  const fDetail = useServerFn(getOrderDetail);
+  const fSettings = useServerFn(getPublicSiteSettings);
   const prods = useQuery({ queryKey: ["admin-products"], queryFn: () => fList(), enabled: open });
+  const settings = useQuery({ queryKey: ["public-settings"], queryFn: () => fSettings(), staleTime: 60_000 });
   const [q, setQ] = useState("");
   const [cart, setCart] = useState<Record<string, number>>({});
   const [customer, setCustomer] = useState({ name: "", phone: "" });
   const [method, setMethod] = useState<"cash" | "mobile_money" | "card">("cash");
   const [saving, setSaving] = useState(false);
+  const [lastSale, setLastSale] = useState<{ id: string; number: string; total: number } | null>(null);
 
   const filtered = useMemo(() => {
     const list = (prods.data ?? []).filter((p: any) => p.is_active);
