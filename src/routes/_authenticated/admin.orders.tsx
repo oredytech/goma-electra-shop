@@ -27,8 +27,10 @@ function AdminOrders() {
   const fList = useServerFn(listOrders);
   const fDetail = useServerFn(getOrderDetail);
   const fStatus = useServerFn(updateOrderStatus);
+  const fSettings = useServerFn(getPublicSiteSettings);
 
   const list = useQuery({ queryKey: ["admin-orders"], queryFn: () => fList() });
+  const settings = useQuery({ queryKey: ["public-settings"], queryFn: () => fSettings(), staleTime: 60_000 });
   const [openId, setOpenId] = useState<string | null>(null);
 
   const detail = useQuery({
@@ -36,6 +38,40 @@ function AdminOrders() {
     queryFn: () => fDetail({ data: { id: openId! } }),
     enabled: !!openId,
   });
+
+  function downloadPdf() {
+    const d = detail.data;
+    if (!d?.order) return;
+    const s = settings.data;
+    downloadInvoicePDF(
+      {
+        invoiceNumber: d.invoice?.invoice_number ?? null,
+        orderNumber: d.order.order_number,
+        issuedAt: d.invoice?.issued_at ?? d.order.created_at,
+        customer: {
+          name: d.order.customer_name,
+          phone: d.order.customer_phone,
+          email: d.order.customer_email,
+          neighborhood: d.order.neighborhood,
+          address: d.order.delivery_address,
+        },
+        items: d.items as never,
+        subtotal: d.order.subtotal,
+        deliveryFee: d.order.delivery_fee,
+        total: d.order.total,
+        currency: d.order.currency,
+        paymentMethod: d.order.payment_method,
+        status: d.order.status,
+      },
+      {
+        name: s?.shop_name ?? "CONETEC",
+        tagline: s?.shop_tagline,
+        address: s?.address_line,
+        city: s?.city, country: s?.country,
+        phone: s?.contact_phone, email: s?.contact_email,
+      },
+    );
+  }
 
   async function setStatus(id: string, status: string) {
     try {
