@@ -208,6 +208,15 @@ const settingsInput = z.object({
   shop_tagline: z.string().trim().max(300).optional().or(z.literal("")),
   delivery_fee: z.number().min(0).default(0),
   default_currency: z.enum(["USD", "CDF"]).default("USD"),
+  invoice_logo_url: z.string().trim().max(500000).optional().or(z.literal("")).nullable(),
+  invoice_signature_url: z.string().trim().max(500000).optional().or(z.literal("")).nullable(),
+  invoice_signatory_name: z.string().trim().max(120).optional().or(z.literal("")).nullable(),
+  invoice_primary_color: z.string().trim().regex(/^#[0-9a-fA-F]{6}$/).optional().or(z.literal("")).nullable(),
+  invoice_accent_color: z.string().trim().regex(/^#[0-9a-fA-F]{6}$/).optional().or(z.literal("")).nullable(),
+  invoice_header_text: z.string().trim().max(400).optional().or(z.literal("")).nullable(),
+  invoice_footer_text: z.string().trim().max(200).optional().or(z.literal("")).nullable(),
+  invoice_layout: z.enum(["classic", "modern", "minimal"]).optional(),
+  invoice_show_signature: z.boolean().optional(),
 });
 
 export const getSettings = createServerFn({ method: "GET" })

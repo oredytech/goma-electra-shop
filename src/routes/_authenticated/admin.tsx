@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings,
-  LogOut, Home, Users, ShieldCheck, Zap, Receipt, UserCog, Menu,
+  LogOut, Home, Users, ShieldCheck, Zap, Receipt, UserCog, Menu, Wallet,
 } from "lucide-react";
 import { useState } from "react";
 import { DirectSaleDialog } from "@/components/DirectSaleDialog";
@@ -33,6 +33,7 @@ const navGestion = [
 const navFinance = [
   { to: "/admin/expenses", label: "Dépenses & loyer", icon: Receipt },
   { to: "/admin/employees", label: "Employés & salaires", icon: UserCog },
+  { to: "/admin/treasury", label: "Trésorerie", icon: Wallet },
   { to: "/admin/reports", label: "Rapports", icon: BarChart3 },
 ];
 const navConfig = [
