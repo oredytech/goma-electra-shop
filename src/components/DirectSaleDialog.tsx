@@ -124,7 +124,10 @@ export function DirectSaleDialog({ open, onOpenChange }: { open: boolean; onOpen
             </div>
             <div className="flex flex-wrap justify-center gap-2">
               <Button onClick={downloadLastInvoice} className="bg-gradient-brand text-brand-foreground">
-                <FileDown className="mr-1.5 size-4" /> Télécharger la facture PDF
+                <FileDown className="mr-1.5 size-4" /> Télécharger PDF
+              </Button>
+              <Button onClick={printLastInvoice} variant="outline">
+                <Printer className="mr-1.5 size-4" /> Imprimer
               </Button>
               <Button variant="outline" onClick={() => { setLastSale(null); }}>Nouvelle vente</Button>
               <Button variant="ghost" onClick={closeAndReset}>Fermer</Button>

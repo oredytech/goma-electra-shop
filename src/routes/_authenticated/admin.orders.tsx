@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatUSD, formatDateTime } from "@/lib/format";
-import { downloadInvoicePDF } from "@/lib/invoice-pdf";
+import { downloadInvoicePDF, printInvoicePDF, styleFromSettings } from "@/lib/invoice-pdf";
 import { toast } from "sonner";
-import { Eye, FileDown } from "lucide-react";
+import { Eye, FileDown, Printer } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({
   component: AdminOrders,
@@ -39,39 +39,29 @@ function AdminOrders() {
     enabled: !!openId,
   });
 
-  function downloadPdf() {
+  function buildInvoiceArgs() {
     const d = detail.data;
-    if (!d?.order) return;
+    if (!d?.order) return null;
     const s = settings.data;
-    downloadInvoicePDF(
-      {
-        invoiceNumber: d.invoice?.invoice_number ?? null,
-        orderNumber: d.order.order_number,
-        issuedAt: d.invoice?.issued_at ?? d.order.created_at,
-        customer: {
-          name: d.order.customer_name,
-          phone: d.order.customer_phone,
-          email: d.order.customer_email,
-          neighborhood: d.order.neighborhood,
-          address: d.order.delivery_address,
-        },
-        items: d.items as never,
-        subtotal: d.order.subtotal,
-        deliveryFee: d.order.delivery_fee,
-        total: d.order.total,
-        currency: d.order.currency,
-        paymentMethod: d.order.payment_method,
-        status: d.order.status,
+    const inv = {
+      invoiceNumber: d.invoice?.invoice_number ?? null,
+      orderNumber: d.order.order_number,
+      issuedAt: d.invoice?.issued_at ?? d.order.created_at,
+      customer: {
+        name: d.order.customer_name, phone: d.order.customer_phone,
+        email: d.order.customer_email, neighborhood: d.order.neighborhood,
+        address: d.order.delivery_address,
       },
-      {
-        name: s?.shop_name ?? "CONETEC",
-        tagline: s?.shop_tagline,
-        address: s?.address_line,
-        city: s?.city, country: s?.country,
-        phone: s?.contact_phone, email: s?.contact_email,
-      },
-    );
+      items: d.items as never,
+      subtotal: d.order.subtotal, deliveryFee: d.order.delivery_fee,
+      total: d.order.total, currency: d.order.currency,
+      paymentMethod: d.order.payment_method, status: d.order.status,
+    };
+    const shop = { name: s?.shop_name ?? "CONETEC", tagline: s?.shop_tagline, address: s?.address_line, city: s?.city, country: s?.country, phone: s?.contact_phone, email: s?.contact_email };
+    return { inv, shop, style: styleFromSettings(s) };
   }
+  function downloadPdf() { const r = buildInvoiceArgs(); if (r) downloadInvoicePDF(r.inv, r.shop, r.style); }
+  function printPdf() { const r = buildInvoiceArgs(); if (r) printInvoicePDF(r.inv, r.shop, r.style); }
 
   async function setStatus(id: string, status: string) {
     try {
