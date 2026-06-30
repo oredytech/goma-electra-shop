@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminTreasuryRouteImport } from './routes/_authenticated/admin.treasury'
 import { Route as AuthenticatedAdminTeamRouteImport } from './routes/_authenticated/admin.team'
 import { Route as AuthenticatedAdminStockRouteImport } from './routes/_authenticated/admin.stock'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
@@ -60,6 +61,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminTreasuryRoute =
+  AuthenticatedAdminTreasuryRouteImport.update({
+    id: '/treasury',
+    path: '/treasury',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminTeamRoute = AuthenticatedAdminTeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -126,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/stock': typeof AuthenticatedAdminStockRoute
   '/admin/team': typeof AuthenticatedAdminTeamRoute
+  '/admin/treasury': typeof AuthenticatedAdminTreasuryRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/webhooks/shwary': typeof ApiPublicWebhooksShwaryRoute
 }
@@ -142,6 +150,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/stock': typeof AuthenticatedAdminStockRoute
   '/admin/team': typeof AuthenticatedAdminTeamRoute
+  '/admin/treasury': typeof AuthenticatedAdminTreasuryRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/api/public/webhooks/shwary': typeof ApiPublicWebhooksShwaryRoute
 }
@@ -161,6 +170,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/stock': typeof AuthenticatedAdminStockRoute
   '/_authenticated/admin/team': typeof AuthenticatedAdminTeamRoute
+  '/_authenticated/admin/treasury': typeof AuthenticatedAdminTreasuryRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/webhooks/shwary': typeof ApiPublicWebhooksShwaryRoute
 }
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/stock'
     | '/admin/team'
+    | '/admin/treasury'
     | '/admin/'
     | '/api/public/webhooks/shwary'
   fileRoutesByTo: FileRoutesByTo
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/stock'
     | '/admin/team'
+    | '/admin/treasury'
     | '/admin'
     | '/api/public/webhooks/shwary'
   id:
@@ -214,6 +226,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/stock'
     | '/_authenticated/admin/team'
+    | '/_authenticated/admin/treasury'
     | '/_authenticated/admin/'
     | '/api/public/webhooks/shwary'
   fileRoutesById: FileRoutesById
@@ -276,6 +289,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/treasury': {
+      id: '/_authenticated/admin/treasury'
+      path: '/treasury'
+      fullPath: '/admin/treasury'
+      preLoaderRoute: typeof AuthenticatedAdminTreasuryRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/team': {
@@ -353,6 +373,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminStockRoute: typeof AuthenticatedAdminStockRoute
   AuthenticatedAdminTeamRoute: typeof AuthenticatedAdminTeamRoute
+  AuthenticatedAdminTreasuryRoute: typeof AuthenticatedAdminTreasuryRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -365,6 +386,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminStockRoute: AuthenticatedAdminStockRoute,
   AuthenticatedAdminTeamRoute: AuthenticatedAdminTeamRoute,
+  AuthenticatedAdminTreasuryRoute: AuthenticatedAdminTreasuryRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 

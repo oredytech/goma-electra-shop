@@ -262,3 +262,30 @@ export function printInvoicePDF(inv: InvoiceData, shop: ShopInfo, style: Invoice
     downloadInvoicePDF(inv, shop, style);
   }
 }
+
+// Convert PublicSiteSettings (or similar) into InvoiceStyle
+export function styleFromSettings(s: {
+  invoice_logo_url?: string | null;
+  invoice_signature_url?: string | null;
+  invoice_signatory_name?: string | null;
+  invoice_primary_color?: string | null;
+  invoice_accent_color?: string | null;
+  invoice_header_text?: string | null;
+  invoice_footer_text?: string | null;
+  invoice_layout?: string | null;
+  invoice_show_signature?: boolean | null;
+} | null | undefined): InvoiceStyle {
+  if (!s) return {};
+  const layout = (s.invoice_layout as InvoiceStyle["layout"]) ?? "classic";
+  return {
+    logoDataUrl: s.invoice_logo_url ?? null,
+    signatureDataUrl: s.invoice_signature_url ?? null,
+    signatoryName: s.invoice_signatory_name ?? null,
+    primaryColor: s.invoice_primary_color ?? null,
+    accentColor: s.invoice_accent_color ?? null,
+    headerText: s.invoice_header_text ?? null,
+    footerText: s.invoice_footer_text ?? null,
+    layout,
+    showSignature: Boolean(s.invoice_show_signature),
+  };
+}
