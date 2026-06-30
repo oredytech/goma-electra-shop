@@ -1,5 +1,4 @@
-// Client-side PDF invoice generator (jsPDF).
-// Safe to import from React components only.
+// Client-side PDF invoice generator (jsPDF) with full branding customization.
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -40,44 +39,103 @@ export type ShopInfo = {
   email?: string | null;
 };
 
-const NAVY: [number, number, number] = [12, 39, 93];
-const TEAL: [number, number, number] = [0, 121, 111];
-const MUTED: [number, number, number] = [110, 120, 140];
+export type InvoiceStyle = {
+  primaryColor?: string | null;
+  accentColor?: string | null;
+  logoDataUrl?: string | null;
+  signatureDataUrl?: string | null;
+  signatoryName?: string | null;
+  headerText?: string | null;
+  footerText?: string | null;
+  layout?: "classic" | "modern" | "minimal" | null;
+  showSignature?: boolean | null;
+};
+
+type RGB = [number, number, number];
+
+function hexToRgb(hex: string | null | undefined, fallback: RGB): RGB {
+  if (!hex) return fallback;
+  const m = hex.replace("#", "").match(/^([0-9a-f]{6})$/i);
+  if (!m) return fallback;
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+const DEFAULT_PRIMARY: RGB = [12, 39, 93];
+const DEFAULT_ACCENT: RGB = [0, 121, 111];
+const MUTED: RGB = [110, 120, 140];
 
 function fmt(n: number | string, currency: string) {
   const v = Number(n ?? 0);
   return `${v.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
 }
 
-export function generateInvoicePDF(inv: InvoiceData, shop: ShopInfo): jsPDF {
+export function generateInvoicePDF(inv: InvoiceData, shop: ShopInfo, style: InvoiceStyle = {}): jsPDF {
+  const PRIMARY = hexToRgb(style.primaryColor, DEFAULT_PRIMARY);
+  const ACCENT = hexToRgb(style.accentColor, DEFAULT_ACCENT);
+  const layout = style.layout ?? "classic";
+
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
 
-  // Header band
-  doc.setFillColor(...NAVY);
-  doc.rect(0, 0, W, 32, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.text(shop.name, 14, 16);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  if (shop.tagline) doc.text(shop.tagline, 14, 22);
-  doc.setFontSize(9);
-  const addrLine = [shop.address, [shop.city, shop.country].filter(Boolean).join(", ")]
-    .filter(Boolean).join(" — ");
-  if (addrLine) doc.text(addrLine, 14, 27);
+  // ===== HEADER =====
+  if (layout === "minimal") {
+    doc.setDrawColor(...PRIMARY);
+    doc.setLineWidth(0.8);
+    doc.line(14, 22, W - 14, 22);
+    doc.setTextColor(...PRIMARY);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text(shop.name, 14, 18);
+  } else {
+    // classic + modern share a colored band
+    doc.setFillColor(...PRIMARY);
+    doc.rect(0, 0, W, 32, "F");
 
+    let textX = 14;
+    if (style.logoDataUrl) {
+      try {
+        doc.addImage(style.logoDataUrl, "PNG", 12, 6, 20, 20, undefined, "FAST");
+        textX = 36;
+      } catch {/* ignore bad logo */}
+    }
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text(shop.name, textX, 16);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    if (shop.tagline) doc.text(shop.tagline, textX, 22);
+    doc.setFontSize(9);
+    const addrLine = [shop.address, [shop.city, shop.country].filter(Boolean).join(", ")]
+      .filter(Boolean).join(" — ");
+    if (addrLine) doc.text(addrLine, textX, 27);
+  }
+
+  const titleY = layout === "minimal" ? 18 : 16;
+  doc.setTextColor(layout === "minimal" ? PRIMARY[0] : 255, layout === "minimal" ? PRIMARY[1] : 255, layout === "minimal" ? PRIMARY[2] : 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("FACTURE", W - 14, 16, { align: "right" });
+  doc.text("FACTURE", W - 14, titleY, { align: "right" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  if (inv.invoiceNumber) doc.text(`N° ${inv.invoiceNumber}`, W - 14, 22, { align: "right" });
-  doc.text(`Commande ${inv.orderNumber}`, W - 14, 27, { align: "right" });
+  if (inv.invoiceNumber) doc.text(`N° ${inv.invoiceNumber}`, W - 14, titleY + 6, { align: "right" });
+  doc.text(`Commande ${inv.orderNumber}`, W - 14, titleY + 11, { align: "right" });
 
-  // Meta block
-  let y = 44;
+  // Optional custom header note
+  let y = layout === "minimal" ? 32 : 44;
+  if (style.headerText) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(...MUTED);
+    const lines = doc.splitTextToSize(style.headerText, W - 28);
+    doc.text(lines, 14, y);
+    y += lines.length * 4 + 4;
+  }
+
+  // ===== META =====
+  doc.setFont("helvetica", "normal");
   doc.setTextColor(...MUTED);
   doc.setFontSize(9);
   doc.text("DATE D'ÉMISSION", 14, y);
@@ -102,7 +160,7 @@ export function generateInvoicePDF(inv: InvoiceData, shop: ShopInfo): jsPDF {
     doc.text(lines, W - 14, y + 5, { align: "right" });
   }
 
-  // Items
+  // ===== ITEMS =====
   const tableStartY = y + 20;
   autoTable(doc, {
     startY: tableStartY,
@@ -114,7 +172,8 @@ export function generateInvoicePDF(inv: InvoiceData, shop: ShopInfo): jsPDF {
       fmt(i.line_total, inv.currency),
     ]),
     styles: { fontSize: 9, cellPadding: 3 },
-    headStyles: { fillColor: NAVY, textColor: 255, fontStyle: "bold" },
+    headStyles: { fillColor: PRIMARY, textColor: 255, fontStyle: "bold" },
+    alternateRowStyles: layout === "modern" ? { fillColor: [245, 247, 251] } : undefined,
     columnStyles: {
       0: { cellWidth: "auto" },
       1: { halign: "right", cellWidth: 18 },
@@ -124,7 +183,7 @@ export function generateInvoicePDF(inv: InvoiceData, shop: ShopInfo): jsPDF {
     margin: { left: 14, right: 14 },
   });
 
-  // Totals
+  // ===== TOTALS =====
   const afterTable = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
   const totalsX = W - 14;
   doc.setFontSize(10);
@@ -138,7 +197,7 @@ export function generateInvoicePDF(inv: InvoiceData, shop: ShopInfo): jsPDF {
   doc.setTextColor(20, 28, 50);
   doc.text(fmt(inv.deliveryFee ?? 0, inv.currency), totalsX, afterTable + 6, { align: "right" });
 
-  doc.setFillColor(...TEAL);
+  doc.setFillColor(...ACCENT);
   doc.rect(W - 80, afterTable + 11, 66, 10, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
@@ -146,34 +205,60 @@ export function generateInvoicePDF(inv: InvoiceData, shop: ShopInfo): jsPDF {
   doc.text("TOTAL", W - 78, afterTable + 18);
   doc.text(fmt(inv.total, inv.currency), totalsX - 2, afterTable + 18, { align: "right" });
 
-  // Payment + status
+  // ===== PAYMENT INFO =====
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...MUTED);
   doc.setFontSize(9);
   let footY = afterTable + 30;
-  if (inv.paymentMethod) {
-    doc.text(`Mode de paiement : ${inv.paymentMethod}`, 14, footY);
-    footY += 5;
-  }
-  if (inv.status) {
-    doc.text(`Statut : ${inv.status.toUpperCase()}`, 14, footY);
+  if (inv.paymentMethod) { doc.text(`Mode de paiement : ${inv.paymentMethod}`, 14, footY); footY += 5; }
+  if (inv.status) { doc.text(`Statut : ${inv.status.toUpperCase()}`, 14, footY); footY += 5; }
+
+  // ===== SIGNATURE =====
+  if (style.showSignature) {
+    const sigY = Math.min(footY + 8, H - 50);
+    doc.setDrawColor(...MUTED);
+    doc.line(W - 80, sigY + 18, W - 14, sigY + 18);
+    if (style.signatureDataUrl) {
+      try { doc.addImage(style.signatureDataUrl, "PNG", W - 70, sigY, 50, 18, undefined, "FAST"); }
+      catch {/* ignore */}
+    }
+    doc.setFontSize(9);
+    doc.setTextColor(...MUTED);
+    doc.text("Signature & cachet", W - 47, sigY + 22, { align: "center" });
+    if (style.signatoryName) {
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(20, 28, 50);
+      doc.text(style.signatoryName, W - 47, sigY + 27, { align: "center" });
+    }
   }
 
-  // Footer
-  const fy = doc.internal.pageSize.getHeight() - 14;
+  // ===== FOOTER =====
+  const fy = H - 14;
   doc.setDrawColor(220);
   doc.line(14, fy - 6, W - 14, fy - 6);
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   const contactParts = [shop.phone, shop.email].filter(Boolean).join(" · ");
-  doc.text(`${shop.name} — ${contactParts || "Goma, RDC"}`, 14, fy);
-  doc.text("Merci pour votre confiance.", W - 14, fy, { align: "right" });
+  doc.text(`${shop.name} — ${contactParts || ""}`.trim(), 14, fy);
+  doc.text(style.footerText || "Merci pour votre confiance.", W - 14, fy, { align: "right" });
 
   return doc;
 }
 
-export function downloadInvoicePDF(inv: InvoiceData, shop: ShopInfo) {
-  const doc = generateInvoicePDF(inv, shop);
+export function downloadInvoicePDF(inv: InvoiceData, shop: ShopInfo, style: InvoiceStyle = {}) {
+  const doc = generateInvoicePDF(inv, shop, style);
   const name = inv.invoiceNumber || inv.orderNumber;
   doc.save(`Facture-${name}.pdf`);
+}
+
+export function printInvoicePDF(inv: InvoiceData, shop: ShopInfo, style: InvoiceStyle = {}) {
+  const doc = generateInvoicePDF(inv, shop, style);
+  doc.autoPrint();
+  const url = doc.output("bloburl");
+  const w = window.open(url.toString(), "_blank");
+  if (!w) {
+    // popup blocked — fallback to download
+    downloadInvoicePDF(inv, shop, style);
+  }
 }
