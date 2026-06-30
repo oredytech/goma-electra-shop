@@ -3,13 +3,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listProductsAdmin, createDirectSale, getOrderDetail } from "@/lib/admin.functions";
 import { getPublicSiteSettings } from "@/lib/site-settings.functions";
-import { downloadInvoicePDF } from "@/lib/invoice-pdf";
+import { downloadInvoicePDF, printInvoicePDF, styleFromSettings } from "@/lib/invoice-pdf";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus, Trash2, Search, ShoppingBag, FileDown } from "lucide-react";
+import { Plus, Minus, Trash2, Search, ShoppingBag, FileDown, Printer } from "lucide-react";
 import { formatUSD } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -71,29 +71,35 @@ export function DirectSaleDialog({ open, onOpenChange }: { open: boolean; onOpen
     } finally { setSaving(false); }
   }
 
+  async function buildInvoice() {
+    if (!lastSale) return null;
+    const d = await fDetail({ data: { id: lastSale.id } });
+    const s = settings.data;
+    const inv = {
+      invoiceNumber: d.invoice?.invoice_number ?? null,
+      orderNumber: d.order!.order_number,
+      issuedAt: d.invoice?.issued_at ?? d.order!.created_at,
+      customer: {
+        name: d.order!.customer_name, phone: d.order!.customer_phone,
+        email: d.order!.customer_email, neighborhood: d.order!.neighborhood,
+        address: d.order!.delivery_address,
+      },
+      items: d.items as never,
+      subtotal: d.order!.subtotal, deliveryFee: d.order!.delivery_fee,
+      total: d.order!.total, currency: d.order!.currency,
+      paymentMethod: d.order!.payment_method, status: d.order!.status,
+    };
+    const shop = { name: s?.shop_name ?? "CONETEC", tagline: s?.shop_tagline, address: s?.address_line, city: s?.city, country: s?.country, phone: s?.contact_phone, email: s?.contact_email };
+    return { inv, shop, style: styleFromSettings(s) };
+  }
+
   async function downloadLastInvoice() {
-    if (!lastSale) return;
-    try {
-      const d = await fDetail({ data: { id: lastSale.id } });
-      const s = settings.data;
-      downloadInvoicePDF(
-        {
-          invoiceNumber: d.invoice?.invoice_number ?? null,
-          orderNumber: d.order!.order_number,
-          issuedAt: d.invoice?.issued_at ?? d.order!.created_at,
-          customer: {
-            name: d.order!.customer_name, phone: d.order!.customer_phone,
-            email: d.order!.customer_email, neighborhood: d.order!.neighborhood,
-            address: d.order!.delivery_address,
-          },
-          items: d.items as never,
-          subtotal: d.order!.subtotal, deliveryFee: d.order!.delivery_fee,
-          total: d.order!.total, currency: d.order!.currency,
-          paymentMethod: d.order!.payment_method, status: d.order!.status,
-        },
-        { name: s?.shop_name ?? "CONETEC", tagline: s?.shop_tagline, address: s?.address_line, city: s?.city, country: s?.country, phone: s?.contact_phone, email: s?.contact_email },
-      );
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Erreur PDF"); }
+    try { const r = await buildInvoice(); if (r) downloadInvoicePDF(r.inv, r.shop, r.style); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Erreur PDF"); }
+  }
+  async function printLastInvoice() {
+    try { const r = await buildInvoice(); if (r) printInvoicePDF(r.inv, r.shop, r.style); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Erreur impression"); }
   }
 
   function closeAndReset() {
