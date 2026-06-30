@@ -43,27 +43,41 @@ function AdminSettings() {
     address_line: "", city: "Goma", country: "RDC", business_hours: "",
     shop_name: "CONETEC", shop_tagline: "",
     delivery_fee: 0, default_currency: "USD",
+    invoice_logo_url: null, invoice_signature_url: null, invoice_signatory_name: "",
+    invoice_primary_color: "#0c275d", invoice_accent_color: "#00796f",
+    invoice_header_text: "", invoice_footer_text: "",
+    invoice_layout: "classic", invoice_show_signature: false,
   });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (q.data) {
+      const d = q.data as any;
       setForm({
-        shwary_merchant_id: q.data.shwary_merchant_id ?? "",
-        shwary_api_key: q.data.shwary_api_key ?? "",
-        shwary_webhook_secret: q.data.shwary_webhook_secret ?? "",
-        contact_email: q.data.contact_email ?? "",
-        contact_phone: q.data.contact_phone ?? "",
-        whatsapp: q.data.whatsapp ?? "",
-        facebook_url: q.data.facebook_url ?? "",
-        address_line: q.data.address_line ?? "",
-        city: q.data.city ?? "Goma",
-        country: q.data.country ?? "RDC",
-        business_hours: q.data.business_hours ?? "",
-        shop_name: q.data.shop_name ?? "CONETEC",
-        shop_tagline: q.data.shop_tagline ?? "",
-        delivery_fee: Number(q.data.delivery_fee ?? 0),
-        default_currency: (q.data.default_currency ?? "USD") as "USD" | "CDF",
+        shwary_merchant_id: d.shwary_merchant_id ?? "",
+        shwary_api_key: d.shwary_api_key ?? "",
+        shwary_webhook_secret: d.shwary_webhook_secret ?? "",
+        contact_email: d.contact_email ?? "",
+        contact_phone: d.contact_phone ?? "",
+        whatsapp: d.whatsapp ?? "",
+        facebook_url: d.facebook_url ?? "",
+        address_line: d.address_line ?? "",
+        city: d.city ?? "Goma",
+        country: d.country ?? "RDC",
+        business_hours: d.business_hours ?? "",
+        shop_name: d.shop_name ?? "CONETEC",
+        shop_tagline: d.shop_tagline ?? "",
+        delivery_fee: Number(d.delivery_fee ?? 0),
+        default_currency: (d.default_currency ?? "USD") as "USD" | "CDF",
+        invoice_logo_url: d.invoice_logo_url ?? null,
+        invoice_signature_url: d.invoice_signature_url ?? null,
+        invoice_signatory_name: d.invoice_signatory_name ?? "",
+        invoice_primary_color: d.invoice_primary_color ?? "#0c275d",
+        invoice_accent_color: d.invoice_accent_color ?? "#00796f",
+        invoice_header_text: d.invoice_header_text ?? "",
+        invoice_footer_text: d.invoice_footer_text ?? "",
+        invoice_layout: (d.invoice_layout as Form["invoice_layout"]) ?? "classic",
+        invoice_show_signature: Boolean(d.invoice_show_signature),
       });
     }
   }, [q.data]);
