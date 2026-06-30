@@ -540,6 +540,15 @@ export type Database = {
           delivery_fee: number
           facebook_url: string | null
           id: boolean
+          invoice_accent_color: string | null
+          invoice_footer_text: string | null
+          invoice_header_text: string | null
+          invoice_layout: string
+          invoice_logo_url: string | null
+          invoice_primary_color: string | null
+          invoice_show_signature: boolean
+          invoice_signatory_name: string | null
+          invoice_signature_url: string | null
           shop_name: string | null
           shop_tagline: string | null
           shwary_api_key: string | null
@@ -559,6 +568,15 @@ export type Database = {
           delivery_fee?: number
           facebook_url?: string | null
           id?: boolean
+          invoice_accent_color?: string | null
+          invoice_footer_text?: string | null
+          invoice_header_text?: string | null
+          invoice_layout?: string
+          invoice_logo_url?: string | null
+          invoice_primary_color?: string | null
+          invoice_show_signature?: boolean
+          invoice_signatory_name?: string | null
+          invoice_signature_url?: string | null
           shop_name?: string | null
           shop_tagline?: string | null
           shwary_api_key?: string | null
@@ -578,6 +596,15 @@ export type Database = {
           delivery_fee?: number
           facebook_url?: string | null
           id?: boolean
+          invoice_accent_color?: string | null
+          invoice_footer_text?: string | null
+          invoice_header_text?: string | null
+          invoice_layout?: string
+          invoice_logo_url?: string | null
+          invoice_primary_color?: string | null
+          invoice_show_signature?: boolean
+          invoice_signatory_name?: string | null
+          invoice_signature_url?: string | null
           shop_name?: string | null
           shop_tagline?: string | null
           shwary_api_key?: string | null
