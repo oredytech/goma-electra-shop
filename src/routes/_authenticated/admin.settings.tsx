@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Smartphone, KeyRound, Store, MapPin, MessageCircle } from "lucide-react";
+import { Smartphone, KeyRound, Store, MapPin, MessageCircle, FileText, Image as ImageIcon, PenTool } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({
@@ -21,6 +21,15 @@ type Form = {
   address_line: string; city: string; country: string; business_hours: string;
   shop_name: string; shop_tagline: string;
   delivery_fee: number; default_currency: "USD" | "CDF";
+  invoice_logo_url: string | null;
+  invoice_signature_url: string | null;
+  invoice_signatory_name: string;
+  invoice_primary_color: string;
+  invoice_accent_color: string;
+  invoice_header_text: string;
+  invoice_footer_text: string;
+  invoice_layout: "classic" | "modern" | "minimal";
+  invoice_show_signature: boolean;
 };
 
 function AdminSettings() {
