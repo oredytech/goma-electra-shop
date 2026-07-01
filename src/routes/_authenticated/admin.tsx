@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings,
-  LogOut, Home, Users, ShieldCheck, Zap, Receipt, UserCog, Menu, Wallet,
+  LogOut, Home, Users, ShieldCheck, Zap, Receipt, UserCog, Menu, Wallet, Activity,
 } from "lucide-react";
 import { useState } from "react";
 import { DirectSaleDialog } from "@/components/DirectSaleDialog";
@@ -24,22 +24,32 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-const navGestion = [
-  { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
-  { to: "/admin/products", label: "Produits", icon: Package },
-  { to: "/admin/orders", label: "Commandes", icon: ShoppingCart },
-  { to: "/admin/stock", label: "Stock", icon: Warehouse },
+// Role-based visibility: 'staff' = terrain (ventes/stock),
+// 'manager' = + finances/rapports/historique, 'admin' = tout.
+type Role = "admin" | "manager" | "staff";
+type NavItem = { to: string; label: string; icon: any; exact?: boolean; roles: Role[] };
+
+const navGestion: NavItem[] = [
+  { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true, roles: ["admin", "manager", "staff"] },
+  { to: "/admin/products", label: "Produits", icon: Package, roles: ["admin", "manager", "staff"] },
+  { to: "/admin/orders", label: "Commandes", icon: ShoppingCart, roles: ["admin", "manager", "staff"] },
+  { to: "/admin/stock", label: "Stock", icon: Warehouse, roles: ["admin", "manager", "staff"] },
 ];
-const navFinance = [
-  { to: "/admin/expenses", label: "Dépenses & loyer", icon: Receipt },
-  { to: "/admin/employees", label: "Employés & salaires", icon: UserCog },
-  { to: "/admin/treasury", label: "Trésorerie", icon: Wallet },
-  { to: "/admin/reports", label: "Rapports", icon: BarChart3 },
+const navFinance: NavItem[] = [
+  { to: "/admin/expenses", label: "Dépenses & loyer", icon: Receipt, roles: ["admin", "manager"] },
+  { to: "/admin/employees", label: "Employés & salaires", icon: UserCog, roles: ["admin", "manager"] },
+  { to: "/admin/treasury", label: "Trésorerie", icon: Wallet, roles: ["admin", "manager"] },
+  { to: "/admin/reports", label: "Rapports", icon: BarChart3, roles: ["admin", "manager"] },
+  { to: "/admin/activity", label: "Historique", icon: Activity, roles: ["admin", "manager"] },
 ];
-const navConfig = [
-  { to: "/admin/team", label: "Équipe & rôles", icon: Users },
-  { to: "/admin/settings", label: "Paramètres", icon: Settings },
+const navConfig: NavItem[] = [
+  { to: "/admin/team", label: "Équipe & rôles", icon: Users, roles: ["admin"] },
+  { to: "/admin/settings", label: "Paramètres", icon: Settings, roles: ["admin"] },
 ];
+
+function filterByRoles(items: NavItem[], roles: string[]): NavItem[] {
+  return items.filter((i) => i.roles.some((r) => roles.includes(r)));
+}
 
 function AdminLayout() {
   const navigate = useNavigate();
