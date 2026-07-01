@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings,
-  LogOut, Home, Users, ShieldCheck, Zap, Receipt, UserCog, Menu, Wallet,
+  LogOut, Home, Users, ShieldCheck, Zap, Receipt, UserCog, Menu, Wallet, Activity,
 } from "lucide-react";
 import { useState } from "react";
 import { DirectSaleDialog } from "@/components/DirectSaleDialog";
@@ -24,22 +24,32 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-const navGestion = [
-  { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
-  { to: "/admin/products", label: "Produits", icon: Package },
-  { to: "/admin/orders", label: "Commandes", icon: ShoppingCart },
-  { to: "/admin/stock", label: "Stock", icon: Warehouse },
+// Role-based visibility: 'staff' = terrain (ventes/stock),
+// 'manager' = + finances/rapports/historique, 'admin' = tout.
+type Role = "admin" | "manager" | "staff";
+type NavItem = { to: string; label: string; icon: any; exact?: boolean; roles: Role[] };
+
+const navGestion: NavItem[] = [
+  { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true, roles: ["admin", "manager", "staff"] },
+  { to: "/admin/products", label: "Produits", icon: Package, roles: ["admin", "manager", "staff"] },
+  { to: "/admin/orders", label: "Commandes", icon: ShoppingCart, roles: ["admin", "manager", "staff"] },
+  { to: "/admin/stock", label: "Stock", icon: Warehouse, roles: ["admin", "manager", "staff"] },
 ];
-const navFinance = [
-  { to: "/admin/expenses", label: "Dépenses & loyer", icon: Receipt },
-  { to: "/admin/employees", label: "Employés & salaires", icon: UserCog },
-  { to: "/admin/treasury", label: "Trésorerie", icon: Wallet },
-  { to: "/admin/reports", label: "Rapports", icon: BarChart3 },
+const navFinance: NavItem[] = [
+  { to: "/admin/expenses", label: "Dépenses & loyer", icon: Receipt, roles: ["admin", "manager"] },
+  { to: "/admin/employees", label: "Employés & salaires", icon: UserCog, roles: ["admin", "manager"] },
+  { to: "/admin/treasury", label: "Trésorerie", icon: Wallet, roles: ["admin", "manager"] },
+  { to: "/admin/reports", label: "Rapports", icon: BarChart3, roles: ["admin", "manager"] },
+  { to: "/admin/activity", label: "Historique", icon: Activity, roles: ["admin", "manager"] },
 ];
-const navConfig = [
-  { to: "/admin/team", label: "Équipe & rôles", icon: Users },
-  { to: "/admin/settings", label: "Paramètres", icon: Settings },
+const navConfig: NavItem[] = [
+  { to: "/admin/team", label: "Équipe & rôles", icon: Users, roles: ["admin"] },
+  { to: "/admin/settings", label: "Paramètres", icon: Settings, roles: ["admin"] },
 ];
+
+function filterByRoles(items: NavItem[], roles: string[]): NavItem[] {
+  return items.filter((i) => i.roles.some((r) => roles.includes(r)));
+}
 
 function AdminLayout() {
   const navigate = useNavigate();
@@ -98,15 +108,16 @@ function AdminLayout() {
     );
   }
 
-  return <AdminShell signOut={signOut} />;
+  return <AdminShell signOut={signOut} roles={role.data.roles} />;
 }
 
-function AdminShell({ signOut }: { signOut: () => void }) {
+function AdminShell({ signOut, roles }: { signOut: () => void; roles: string[] }) {
   const [saleOpen, setSaleOpen] = useState(false);
+  const canSell = roles.some((r) => ["admin", "manager", "staff"].includes(r));
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-secondary/30">
-        <AdminSidebar signOut={signOut} />
+        <AdminSidebar signOut={signOut} roles={roles} />
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 flex items-center gap-2 border-b bg-card/95 px-3 py-2 backdrop-blur sm:px-4">
             <SidebarTrigger className="size-9 shrink-0 border border-border bg-background shadow-sm hover:bg-secondary">
@@ -117,9 +128,16 @@ function AdminShell({ signOut }: { signOut: () => void }) {
               <span className="hidden text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:inline">Admin</span>
             </Link>
             <div className="ml-auto flex items-center gap-1">
-              <Button onClick={() => setSaleOpen(true)} size="sm" className="bg-gradient-brand text-brand-foreground shadow-brand">
-                <Zap className="size-4 sm:mr-1.5" /> <span className="hidden sm:inline">Vente directe</span>
-              </Button>
+              {roles.length > 0 && (
+                <span className="hidden rounded-full bg-gradient-brand px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-foreground sm:inline">
+                  {roles[0]}
+                </span>
+              )}
+              {canSell && (
+                <Button onClick={() => setSaleOpen(true)} size="sm" className="bg-gradient-brand text-brand-foreground shadow-brand">
+                  <Zap className="size-4 sm:mr-1.5" /> <span className="hidden sm:inline">Vente directe</span>
+                </Button>
+              )}
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
                 <Link to="/"><Home className="mr-1.5 size-4" /> Site</Link>
               </Button>
@@ -133,12 +151,13 @@ function AdminShell({ signOut }: { signOut: () => void }) {
           </main>
         </div>
       </div>
-      <DirectSaleDialog open={saleOpen} onOpenChange={setSaleOpen} />
+      {canSell && <DirectSaleDialog open={saleOpen} onOpenChange={setSaleOpen} />}
     </SidebarProvider>
   );
 }
 
-function NavSection({ label, items }: { label: string; items: { to: string; label: string; icon: any; exact?: boolean }[] }) {
+function NavSection({ label, items }: { label: string; items: NavItem[] }) {
+  if (items.length === 0) return null;
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
@@ -164,9 +183,12 @@ function NavSection({ label, items }: { label: string; items: { to: string; labe
   );
 }
 
-function AdminSidebar({ signOut }: { signOut: () => void }) {
+function AdminSidebar({ signOut, roles }: { signOut: () => void; roles: string[] }) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const g = filterByRoles(navGestion, roles);
+  const f = filterByRoles(navFinance, roles);
+  const c = filterByRoles(navConfig, roles);
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b p-3">
@@ -178,9 +200,9 @@ function AdminSidebar({ signOut }: { signOut: () => void }) {
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <NavSection label="Gestion" items={navGestion} />
-        <NavSection label="Finances & RH" items={navFinance} />
-        <NavSection label="Configuration" items={navConfig} />
+        <NavSection label="Gestion" items={g} />
+        <NavSection label="Finances & RH" items={f} />
+        <NavSection label="Configuration" items={c} />
       </SidebarContent>
       <SidebarFooter className="border-t p-2">
         <SidebarMenu>

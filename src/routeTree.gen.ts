@@ -25,6 +25,7 @@ import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
 import { Route as AuthenticatedAdminExpensesRouteImport } from './routes/_authenticated/admin.expenses'
 import { Route as AuthenticatedAdminEmployeesRouteImport } from './routes/_authenticated/admin.employees'
+import { Route as AuthenticatedAdminActivityRouteImport } from './routes/_authenticated/admin.activity'
 import { Route as ApiPublicWebhooksShwaryRouteImport } from './routes/api/public/webhooks/shwary'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -113,6 +114,12 @@ const AuthenticatedAdminEmployeesRoute =
     path: '/employees',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminActivityRoute =
+  AuthenticatedAdminActivityRouteImport.update({
+    id: '/activity',
+    path: '/activity',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicWebhooksShwaryRoute = ApiPublicWebhooksShwaryRouteImport.update({
   id: '/api/public/webhooks/shwary',
   path: '/api/public/webhooks/shwary',
@@ -125,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/boutique': typeof BoutiqueRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesRoute
   '/admin/expenses': typeof AuthenticatedAdminExpensesRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
@@ -142,6 +150,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/boutique': typeof BoutiqueRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesRoute
   '/admin/expenses': typeof AuthenticatedAdminExpensesRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
@@ -162,6 +171,7 @@ export interface FileRoutesById {
   '/boutique': typeof BoutiqueRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/_authenticated/admin/employees': typeof AuthenticatedAdminEmployeesRoute
   '/_authenticated/admin/expenses': typeof AuthenticatedAdminExpensesRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/boutique'
     | '/sitemap.xml'
     | '/admin'
+    | '/admin/activity'
     | '/admin/employees'
     | '/admin/expenses'
     | '/admin/orders'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/boutique'
     | '/sitemap.xml'
+    | '/admin/activity'
     | '/admin/employees'
     | '/admin/expenses'
     | '/admin/orders'
@@ -218,6 +230,7 @@ export interface FileRouteTypes {
     | '/boutique'
     | '/sitemap.xml'
     | '/_authenticated/admin'
+    | '/_authenticated/admin/activity'
     | '/_authenticated/admin/employees'
     | '/_authenticated/admin/expenses'
     | '/_authenticated/admin/orders'
@@ -354,6 +367,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminEmployeesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/activity': {
+      id: '/_authenticated/admin/activity'
+      path: '/activity'
+      fullPath: '/admin/activity'
+      preLoaderRoute: typeof AuthenticatedAdminActivityRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/webhooks/shwary': {
       id: '/api/public/webhooks/shwary'
       path: '/api/public/webhooks/shwary'
@@ -365,6 +385,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminActivityRoute: typeof AuthenticatedAdminActivityRoute
   AuthenticatedAdminEmployeesRoute: typeof AuthenticatedAdminEmployeesRoute
   AuthenticatedAdminExpensesRoute: typeof AuthenticatedAdminExpensesRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
@@ -378,6 +399,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminActivityRoute: AuthenticatedAdminActivityRoute,
   AuthenticatedAdminEmployeesRoute: AuthenticatedAdminEmployeesRoute,
   AuthenticatedAdminExpensesRoute: AuthenticatedAdminExpensesRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
