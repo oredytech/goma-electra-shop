@@ -17,6 +17,13 @@ export type PublicSiteSettings = {
   contact_phone: string | null;
   whatsapp: string | null;
   facebook_url: string | null;
+  instagram_url: string | null;
+  linkedin_url: string | null;
+  tiktok_url: string | null;
+  youtube_url: string | null;
+  twitter_url: string | null;
+  website_url: string | null;
+  maps_url: string | null;
   address_line: string | null;
   city: string | null;
   country: string | null;
@@ -37,29 +44,38 @@ export const getPublicSiteSettings = createServerFn({ method: "GET" }).handler(
     const sb = publicClient();
     const { data } = await sb
       .from("shop_settings")
-      .select("shop_name, shop_tagline, contact_email, contact_phone, whatsapp, facebook_url, address_line, city, country, business_hours, invoice_logo_url, invoice_signature_url, invoice_signatory_name, invoice_primary_color, invoice_accent_color, invoice_header_text, invoice_footer_text, invoice_layout, invoice_show_signature")
+      .select("*")
       .eq("id", true)
       .maybeSingle();
+    const d = (data ?? {}) as Record<string, unknown>;
+    const s = <T,>(k: string, fb: T): T => (d[k] as T) ?? fb;
     return {
-      shop_name: data?.shop_name ?? "CONETEC",
-      shop_tagline: data?.shop_tagline ?? null,
-      contact_email: data?.contact_email ?? null,
-      contact_phone: data?.contact_phone ?? null,
-      whatsapp: data?.whatsapp ?? null,
-      facebook_url: data?.facebook_url ?? null,
-      address_line: data?.address_line ?? "Quartier Virunga, Av. OSSO N°18",
-      city: data?.city ?? "Goma",
-      country: data?.country ?? "RDC",
-      business_hours: data?.business_hours ?? null,
-      invoice_logo_url: (data as any)?.invoice_logo_url ?? null,
-      invoice_signature_url: (data as any)?.invoice_signature_url ?? null,
-      invoice_signatory_name: (data as any)?.invoice_signatory_name ?? null,
-      invoice_primary_color: (data as any)?.invoice_primary_color ?? "#0c275d",
-      invoice_accent_color: (data as any)?.invoice_accent_color ?? "#00796f",
-      invoice_header_text: (data as any)?.invoice_header_text ?? null,
-      invoice_footer_text: (data as any)?.invoice_footer_text ?? null,
-      invoice_layout: (data as any)?.invoice_layout ?? "classic",
-      invoice_show_signature: Boolean((data as any)?.invoice_show_signature),
+      shop_name: s("shop_name", "CONETEC"),
+      shop_tagline: s("shop_tagline", null),
+      contact_email: s("contact_email", null),
+      contact_phone: s("contact_phone", null),
+      whatsapp: s("whatsapp", null),
+      facebook_url: s("facebook_url", null),
+      instagram_url: s("instagram_url", null),
+      linkedin_url: s("linkedin_url", null),
+      tiktok_url: s("tiktok_url", null),
+      youtube_url: s("youtube_url", null),
+      twitter_url: s("twitter_url", null),
+      website_url: s("website_url", null),
+      maps_url: s("maps_url", null),
+      address_line: s("address_line", "Quartier Virunga, Av. OSSO N°18"),
+      city: s("city", "Goma"),
+      country: s("country", "RDC"),
+      business_hours: s("business_hours", null),
+      invoice_logo_url: s("invoice_logo_url", null),
+      invoice_signature_url: s("invoice_signature_url", null),
+      invoice_signatory_name: s("invoice_signatory_name", null),
+      invoice_primary_color: s("invoice_primary_color", "#0c275d"),
+      invoice_accent_color: s("invoice_accent_color", "#00796f"),
+      invoice_header_text: s("invoice_header_text", null),
+      invoice_footer_text: s("invoice_footer_text", null),
+      invoice_layout: s("invoice_layout", "classic"),
+      invoice_show_signature: Boolean(d["invoice_show_signature"]),
     };
   },
 );
