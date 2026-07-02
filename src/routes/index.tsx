@@ -6,14 +6,14 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Wrench, Zap, Wifi, Antenna, ShieldCheck, Truck, Package,
-  Search, ArrowRight, CheckCircle2,
+  Search, ArrowRight,
 } from "lucide-react";
 import heroImg from "@/assets/hero-electrician.jpg";
 import { listProducts, listCategories } from "@/lib/catalog.functions";
 import { formatUSD } from "@/lib/format";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -51,6 +51,13 @@ function HomePage() {
   const items = products.data ?? [];
   const [q, setQ] = useState("");
 
+  // ==== Hero services slider ====
+  const [slide, setSlide] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setSlide((s) => (s + 1) % services.length), 4200);
+    return () => clearInterval(t);
+  }, []);
+
   function go(e?: React.FormEvent) {
     e?.preventDefault();
     const search = q.trim();
@@ -62,12 +69,12 @@ function HomePage() {
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
 
-      {/* HERO — style B2B sourcing */}
+      {/* HERO — épuré, sous-titre = slider de services */}
       <section className="relative isolate overflow-hidden bg-[oklch(0.18_0.06_264)] text-white">
         <img
           src={heroImg}
           alt="Équipe technique CONETEC"
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-40"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-35"
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[oklch(0.16_0.06_264)] via-[oklch(0.16_0.06_264)/0.85] to-[oklch(0.16_0.06_264)/0.3]" />
 
@@ -77,13 +84,38 @@ function HomePage() {
               <Zap className="size-3.5 text-accent" /> Goma · RDC
             </span>
             <h1 className="mt-4 text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl lg:text-6xl">
-              ÉQUIPEMENTS<br />
-              <span className="text-accent">ÉLECTRONIQUES</span><br />
-              <span className="text-white/90">livrés à Goma.</span>
+              L'ÉLECTRONIQUE,<br />
+              <span className="text-accent">à portée de clic.</span>
             </h1>
-            <p className="mt-4 max-w-lg text-base text-white/80 sm:text-lg">
-              Achat en ligne + techniciens à domicile. Paiement Mobile Money.
-            </p>
+
+            {/* Sous-titre : slider de services */}
+            <div className="relative mt-5 h-14 max-w-lg overflow-hidden">
+              {services.map((s, i) => (
+                <div
+                  key={s.title}
+                  className={`absolute inset-0 flex items-center gap-3 transition-all duration-700 ${i === slide ? "translate-y-0 opacity-100" : i === (slide - 1 + services.length) % services.length ? "-translate-y-full opacity-0" : "translate-y-full opacity-0"}`}
+                  aria-hidden={i !== slide}
+                >
+                  <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent/25 backdrop-blur">
+                    <s.icon className="size-5 text-accent" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-base font-semibold sm:text-lg">{s.title}</div>
+                    <div className="truncate text-xs text-white/70 sm:text-sm">{s.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 flex gap-1.5">
+              {services.map((_, i) => (
+                <button
+                  key={i}
+                  aria-label={`Service ${i + 1}`}
+                  onClick={() => setSlide(i)}
+                  className={`h-1.5 rounded-full transition-all ${i === slide ? "w-6 bg-accent" : "w-1.5 bg-white/30"}`}
+                />
+              ))}
+            </div>
 
             {/* Search bar */}
             <form onSubmit={go} className="mt-7 flex w-full max-w-xl flex-wrap gap-2">
@@ -115,35 +147,7 @@ function HomePage() {
                 </Link>
               ))}
             </div>
-
-            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/80 sm:text-sm">
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4 text-accent" /> Mobile Money</span>
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4 text-accent" /> Livraison Goma</span>
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4 text-accent" /> Facture par email</span>
-            </div>
           </div>
-        </div>
-      </section>
-
-      {/* TRUST BAR */}
-      <section className="border-b border-border bg-muted/40">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-5 sm:px-6 md:grid-cols-4">
-          {[
-            { i: Truck, t: "Livraison Goma", s: "Sous 24–48h" },
-            { i: ShieldCheck, t: "Produits garantis", s: "Qualité contrôlée" },
-            { i: Wrench, t: "Techniciens", s: "Intervention rapide" },
-            { i: Package, t: "Boutique", s: "Av. OSSO N°18" },
-          ].map((b) => (
-            <div key={b.t} className="flex min-w-0 items-center gap-3">
-              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-brand text-brand-foreground">
-                <b.i className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <div className="truncate text-sm font-semibold">{b.t}</div>
-                <div className="truncate text-xs text-muted-foreground">{b.s}</div>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
