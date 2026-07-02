@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useCart } from "@/lib/cart";
 import { formatUSD } from "@/lib/format";
-import { Search, ShoppingBag, Package, SlidersHorizontal, X } from "lucide-react";
+import { Search, ShoppingBag, Package, SlidersHorizontal, X, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 const searchSchema = z.object({
@@ -206,20 +206,37 @@ function BoutiquePage() {
                     <div className="mt-0.5 text-xs text-muted-foreground">
                       {p.stock > 0 ? `${p.stock} en stock` : <span className="text-destructive">Rupture</span>}
                     </div>
-                    <Button
-                      size="sm"
-                      className="mt-2 w-full bg-gradient-brand text-brand-foreground"
-                      disabled={p.stock <= 0}
-                      onClick={() => {
-                        add({
-                          productId: p.id, name: p.name, slug: p.slug,
-                          unitPrice: Number(p.price_usd), imageUrl: p.image_url, stock: p.stock,
-                        });
-                        toast.success(`${p.name} ajouté au panier`);
-                      }}
-                    >
-                      <ShoppingBag className="mr-1.5 size-3.5" /> Acheter
-                    </Button>
+                    <div className="mt-2 flex gap-1.5">
+                      <Button
+                        size="sm"
+                        className="flex-1 bg-gradient-brand text-brand-foreground"
+                        disabled={p.stock <= 0}
+                        onClick={() => {
+                          add({
+                            productId: p.id, name: p.name, slug: p.slug,
+                            unitPrice: Number(p.price_usd), imageUrl: p.image_url, stock: p.stock,
+                          });
+                          toast.success(`${p.name} ajouté au panier`);
+                        }}
+                      >
+                        <ShoppingBag className="mr-1 size-3.5" /> Acheter
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        aria-label="Partager"
+                        onClick={async () => {
+                          const url = `${window.location.origin}/produit/${p.slug}`;
+                          const shareData = { title: p.name, text: `${p.name} — ${formatUSD(p.price_usd)}`, url };
+                          try {
+                            if (navigator.share) await navigator.share(shareData);
+                            else { await navigator.clipboard.writeText(url); toast.success("Lien copié"); }
+                          } catch { /* user cancelled */ }
+                        }}
+                      >
+                        <Share2 className="size-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 </Card>
               ))}
