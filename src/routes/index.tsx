@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
-  Wrench, Zap, Wifi, Antenna, ShieldCheck, Truck, Package,
+  Wrench, Zap, Wifi, Antenna, Package,
   Search, ArrowRight,
 } from "lucide-react";
 import heroImg from "@/assets/hero-electrician.jpg";
