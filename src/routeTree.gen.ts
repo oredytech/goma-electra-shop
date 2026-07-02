@@ -10,10 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as CompteRouteImport } from './routes/compte'
 import { Route as BoutiqueRouteImport } from './routes/boutique'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProduitSlugRouteImport } from './routes/produit.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminTreasuryRouteImport } from './routes/_authenticated/admin.treasury'
@@ -33,6 +35,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompteRoute = CompteRouteImport.update({
+  id: '/compte',
+  path: '/compte',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BoutiqueRoute = BoutiqueRouteImport.update({
   id: '/boutique',
   path: '/boutique',
@@ -50,6 +57,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProduitSlugRoute = ProduitSlugRouteImport.update({
+  id: '/produit/$slug',
+  path: '/produit/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -130,8 +142,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/boutique': typeof BoutiqueRoute
+  '/compte': typeof CompteRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/produit/$slug': typeof ProduitSlugRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesRoute
   '/admin/expenses': typeof AuthenticatedAdminExpensesRoute
@@ -149,7 +163,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/boutique': typeof BoutiqueRoute
+  '/compte': typeof CompteRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/produit/$slug': typeof ProduitSlugRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/employees': typeof AuthenticatedAdminEmployeesRoute
   '/admin/expenses': typeof AuthenticatedAdminExpensesRoute
@@ -169,8 +185,10 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/boutique': typeof BoutiqueRoute
+  '/compte': typeof CompteRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/produit/$slug': typeof ProduitSlugRoute
   '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/_authenticated/admin/employees': typeof AuthenticatedAdminEmployeesRoute
   '/_authenticated/admin/expenses': typeof AuthenticatedAdminExpensesRoute
@@ -190,8 +208,10 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/boutique'
+    | '/compte'
     | '/sitemap.xml'
     | '/admin'
+    | '/produit/$slug'
     | '/admin/activity'
     | '/admin/employees'
     | '/admin/expenses'
@@ -209,7 +229,9 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/boutique'
+    | '/compte'
     | '/sitemap.xml'
+    | '/produit/$slug'
     | '/admin/activity'
     | '/admin/employees'
     | '/admin/expenses'
@@ -228,8 +250,10 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/boutique'
+    | '/compte'
     | '/sitemap.xml'
     | '/_authenticated/admin'
+    | '/produit/$slug'
     | '/_authenticated/admin/activity'
     | '/_authenticated/admin/employees'
     | '/_authenticated/admin/expenses'
@@ -249,7 +273,9 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   BoutiqueRoute: typeof BoutiqueRoute
+  CompteRoute: typeof CompteRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ProduitSlugRoute: typeof ProduitSlugRoute
   ApiPublicWebhooksShwaryRoute: typeof ApiPublicWebhooksShwaryRoute
 }
 
@@ -260,6 +286,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compte': {
+      id: '/compte'
+      path: '/compte'
+      fullPath: '/compte'
+      preLoaderRoute: typeof CompteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/boutique': {
@@ -288,6 +321,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produit/$slug': {
+      id: '/produit/$slug'
+      path: '/produit/$slug'
+      fullPath: '/produit/$slug'
+      preLoaderRoute: typeof ProduitSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -431,7 +471,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   BoutiqueRoute: BoutiqueRoute,
+  CompteRoute: CompteRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ProduitSlugRoute: ProduitSlugRoute,
   ApiPublicWebhooksShwaryRoute: ApiPublicWebhooksShwaryRoute,
 }
 export const routeTree = rootRouteImport

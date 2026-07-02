@@ -1,0 +1,9 @@
+
+ALTER TABLE public.shop_settings
+  ADD COLUMN IF NOT EXISTS instagram_url text,
+  ADD COLUMN IF NOT EXISTS linkedin_url text,
+  ADD COLUMN IF NOT EXISTS tiktok_url  text,
+  ADD COLUMN IF NOT EXISTS youtube_url text,
+  ADD COLUMN IF NOT EXISTS twitter_url text,
+  ADD COLUMN IF NOT EXISTS website_url text,
+  ADD COLUMN IF NOT EXISTS maps_url    text;

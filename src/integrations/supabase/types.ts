@@ -540,6 +540,7 @@ export type Database = {
           delivery_fee: number
           facebook_url: string | null
           id: boolean
+          instagram_url: string | null
           invoice_accent_color: string | null
           invoice_footer_text: string | null
           invoice_header_text: string | null
@@ -549,13 +550,19 @@ export type Database = {
           invoice_show_signature: boolean
           invoice_signatory_name: string | null
           invoice_signature_url: string | null
+          linkedin_url: string | null
+          maps_url: string | null
           shop_name: string | null
           shop_tagline: string | null
           shwary_api_key: string | null
           shwary_merchant_id: string | null
           shwary_webhook_secret: string | null
+          tiktok_url: string | null
+          twitter_url: string | null
           updated_at: string
+          website_url: string | null
           whatsapp: string | null
+          youtube_url: string | null
         }
         Insert: {
           address_line?: string | null
@@ -568,6 +575,7 @@ export type Database = {
           delivery_fee?: number
           facebook_url?: string | null
           id?: boolean
+          instagram_url?: string | null
           invoice_accent_color?: string | null
           invoice_footer_text?: string | null
           invoice_header_text?: string | null
@@ -577,13 +585,19 @@ export type Database = {
           invoice_show_signature?: boolean
           invoice_signatory_name?: string | null
           invoice_signature_url?: string | null
+          linkedin_url?: string | null
+          maps_url?: string | null
           shop_name?: string | null
           shop_tagline?: string | null
           shwary_api_key?: string | null
           shwary_merchant_id?: string | null
           shwary_webhook_secret?: string | null
+          tiktok_url?: string | null
+          twitter_url?: string | null
           updated_at?: string
+          website_url?: string | null
           whatsapp?: string | null
+          youtube_url?: string | null
         }
         Update: {
           address_line?: string | null
@@ -596,6 +610,7 @@ export type Database = {
           delivery_fee?: number
           facebook_url?: string | null
           id?: boolean
+          instagram_url?: string | null
           invoice_accent_color?: string | null
           invoice_footer_text?: string | null
           invoice_header_text?: string | null
@@ -605,13 +620,19 @@ export type Database = {
           invoice_show_signature?: boolean
           invoice_signatory_name?: string | null
           invoice_signature_url?: string | null
+          linkedin_url?: string | null
+          maps_url?: string | null
           shop_name?: string | null
           shop_tagline?: string | null
           shwary_api_key?: string | null
           shwary_merchant_id?: string | null
           shwary_webhook_secret?: string | null
+          tiktok_url?: string | null
+          twitter_url?: string | null
           updated_at?: string
+          website_url?: string | null
           whatsapp?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }
