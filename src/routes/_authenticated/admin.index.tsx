@@ -49,18 +49,24 @@ function AdminDashboard() {
     return days;
   }, [paid]);
 
-  // Notification toast for low stock — once per session
+  // Notification toasts for low stock + ruptures — once per session
   const notified = useRef(false);
   useEffect(() => {
     if (notified.current || prods.isLoading) return;
+    if (outOfStock.length > 0) {
+      toast.error(`🚨 ${outOfStock.length} produit(s) en RUPTURE`, {
+        description: outOfStock.slice(0, 3).map((p: any) => p.name).join(", ") + (outOfStock.length > 3 ? "…" : ""),
+        duration: 8000,
+      });
+    }
     if (lowStock.length > 0) {
       toast.warning(`${lowStock.length} produit(s) à ravitailler`, {
         description: lowStock.slice(0, 3).map((p: any) => p.name).join(", ") + (lowStock.length > 3 ? "…" : ""),
         duration: 6000,
       });
-      notified.current = true;
     }
-  }, [lowStock, prods.isLoading]);
+    if (outOfStock.length > 0 || lowStock.length > 0) notified.current = true;
+  }, [lowStock, outOfStock, prods.isLoading]);
 
   const kpis = [
     { label: "Revenus totaux", value: formatUSD(revenue), icon: DollarSign, gradient: "from-emerald-500 via-emerald-600 to-teal-700", shape: "circle" },
