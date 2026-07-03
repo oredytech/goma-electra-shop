@@ -37,6 +37,9 @@ export type PublicSiteSettings = {
   invoice_footer_text: string | null;
   invoice_layout: string | null;
   invoice_show_signature: boolean;
+  usd_to_cdf: number | null;
+  rate_updated_at: string | null;
+  rate_source: string | null;
 };
 
 export const getPublicSiteSettings = createServerFn({ method: "GET" }).handler(
@@ -76,6 +79,9 @@ export const getPublicSiteSettings = createServerFn({ method: "GET" }).handler(
       invoice_footer_text: s("invoice_footer_text", null),
       invoice_layout: s("invoice_layout", "classic"),
       invoice_show_signature: Boolean(d["invoice_show_signature"]),
+      usd_to_cdf: (d["usd_to_cdf"] as number) ?? 2800,
+      rate_updated_at: (d["rate_updated_at"] as string) ?? null,
+      rate_source: (d["rate_source"] as string) ?? "manual",
     };
   },
 );
