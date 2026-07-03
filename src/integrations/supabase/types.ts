@@ -71,6 +71,191 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string | null
+          handled: boolean
+          id: string
+          message: string
+          name: string
+          phone: string | null
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          handled?: boolean
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          handled?: boolean
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      credit_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          credit_id: string
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          credit_id: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          credit_id?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_payments_credit_id_fkey"
+            columns: ["credit_id"]
+            isOneToOne: false
+            referencedRelation: "customer_credits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_credits: {
+        Row: {
+          amount: number
+          balance: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_id: string
+          due_date: string | null
+          id: string
+          label: string
+          notes: string | null
+          order_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          balance: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_id: string
+          due_date?: string | null
+          id?: string
+          label: string
+          notes?: string | null
+          order_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          balance?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_id?: string
+          due_date?: string | null
+          id?: string
+          label?: string
+          notes?: string | null
+          order_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_credits_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_credits_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          last_order_at: string | null
+          neighborhood: string | null
+          notes: string | null
+          orders_count: number
+          phone: string | null
+          total_spent: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          last_order_at?: string | null
+          neighborhood?: string | null
+          notes?: string | null
+          orders_count?: number
+          phone?: string | null
+          total_spent?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          last_order_at?: string | null
+          neighborhood?: string | null
+          notes?: string | null
+          orders_count?: number
+          phone?: string | null
+          total_spent?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           created_at: string
@@ -392,6 +577,39 @@ export type Database = {
         }
         Relationships: []
       }
+      product_suggestions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          product_name: string
+          status: string
+          suggester_email: string | null
+          suggester_name: string | null
+          suggester_phone: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          product_name: string
+          status?: string
+          suggester_email?: string | null
+          suggester_name?: string | null
+          suggester_phone?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          product_name?: string
+          status?: string
+          suggester_email?: string | null
+          suggester_name?: string | null
+          suggester_phone?: string | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category_id: string | null
@@ -552,6 +770,8 @@ export type Database = {
           invoice_signature_url: string | null
           linkedin_url: string | null
           maps_url: string | null
+          rate_source: string | null
+          rate_updated_at: string | null
           shop_name: string | null
           shop_tagline: string | null
           shwary_api_key: string | null
@@ -560,6 +780,7 @@ export type Database = {
           tiktok_url: string | null
           twitter_url: string | null
           updated_at: string
+          usd_to_cdf: number | null
           website_url: string | null
           whatsapp: string | null
           youtube_url: string | null
@@ -587,6 +808,8 @@ export type Database = {
           invoice_signature_url?: string | null
           linkedin_url?: string | null
           maps_url?: string | null
+          rate_source?: string | null
+          rate_updated_at?: string | null
           shop_name?: string | null
           shop_tagline?: string | null
           shwary_api_key?: string | null
@@ -595,6 +818,7 @@ export type Database = {
           tiktok_url?: string | null
           twitter_url?: string | null
           updated_at?: string
+          usd_to_cdf?: number | null
           website_url?: string | null
           whatsapp?: string | null
           youtube_url?: string | null
@@ -622,6 +846,8 @@ export type Database = {
           invoice_signature_url?: string | null
           linkedin_url?: string | null
           maps_url?: string | null
+          rate_source?: string | null
+          rate_updated_at?: string | null
           shop_name?: string | null
           shop_tagline?: string | null
           shwary_api_key?: string | null
@@ -630,6 +856,7 @@ export type Database = {
           tiktok_url?: string | null
           twitter_url?: string | null
           updated_at?: string
+          usd_to_cdf?: number | null
           website_url?: string | null
           whatsapp?: string | null
           youtube_url?: string | null
@@ -670,6 +897,7 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      refresh_credit_overdue: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "manager" | "staff" | "customer"

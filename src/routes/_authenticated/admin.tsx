@@ -12,6 +12,7 @@ import {
 import {
   LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings,
   LogOut, Home, Users, ShieldCheck, Zap, Receipt, UserCog, Menu, Wallet, Activity,
+  HandCoins, Building2, UsersRound, MessageSquare, TrendingUp,
 } from "lucide-react";
 import { useState } from "react";
 import { DirectSaleDialog } from "@/components/DirectSaleDialog";
@@ -24,8 +25,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
 });
 
-// Role-based visibility: 'staff' = terrain (ventes/stock),
-// 'manager' = + finances/rapports/historique, 'admin' = tout.
+// Role-based visibility
 type Role = "admin" | "manager" | "staff";
 type NavItem = { to: string; label: string; icon: any; exact?: boolean; roles: Role[] };
 
@@ -35,15 +35,22 @@ const navGestion: NavItem[] = [
   { to: "/admin/orders", label: "Commandes", icon: ShoppingCart, roles: ["admin", "manager", "staff"] },
   { to: "/admin/stock", label: "Stock", icon: Warehouse, roles: ["admin", "manager", "staff"] },
 ];
+const navClients: NavItem[] = [
+  { to: "/admin/customers", label: "Répertoire clients", icon: UsersRound, roles: ["admin", "manager", "staff"] },
+  { to: "/admin/credits", label: "Crédits & dettes", icon: HandCoins, roles: ["admin", "manager", "staff"] },
+  { to: "/admin/messages", label: "Messages & suggestions", icon: MessageSquare, roles: ["admin", "manager", "staff"] },
+];
 const navFinance: NavItem[] = [
-  { to: "/admin/expenses", label: "Dépenses & loyer", icon: Receipt, roles: ["admin", "manager"] },
+  { to: "/admin/sales", label: "Rapport des ventes", icon: TrendingUp, roles: ["admin", "manager"] },
+  { to: "/admin/expenses", label: "Dépenses", icon: Receipt, roles: ["admin", "manager"] },
+  { to: "/admin/rent", label: "Loyer", icon: Building2, roles: ["admin", "manager"] },
   { to: "/admin/employees", label: "Employés & salaires", icon: UserCog, roles: ["admin", "manager"] },
   { to: "/admin/treasury", label: "Trésorerie", icon: Wallet, roles: ["admin", "manager"] },
   { to: "/admin/reports", label: "Rapports", icon: BarChart3, roles: ["admin", "manager"] },
   { to: "/admin/activity", label: "Historique", icon: Activity, roles: ["admin", "manager"] },
 ];
 const navConfig: NavItem[] = [
-  { to: "/admin/team", label: "Équipe & rôles", icon: Users, roles: ["admin"] },
+  { to: "/admin/team", label: "Utilisateurs", icon: Users, roles: ["admin"] },
   { to: "/admin/settings", label: "Paramètres", icon: Settings, roles: ["admin"] },
 ];
 
@@ -187,6 +194,7 @@ function AdminSidebar({ signOut, roles }: { signOut: () => void; roles: string[]
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const g = filterByRoles(navGestion, roles);
+  const cl = filterByRoles(navClients, roles);
   const f = filterByRoles(navFinance, roles);
   const c = filterByRoles(navConfig, roles);
   return (
@@ -201,6 +209,7 @@ function AdminSidebar({ signOut, roles }: { signOut: () => void; roles: string[]
       </SidebarHeader>
       <SidebarContent>
         <NavSection label="Gestion" items={g} />
+        <NavSection label="Clientèle & crédits" items={cl} />
         <NavSection label="Finances & RH" items={f} />
         <NavSection label="Configuration" items={c} />
       </SidebarContent>

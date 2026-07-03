@@ -224,7 +224,10 @@ const settingsInput = z.object({
   invoice_footer_text: z.string().trim().max(200).optional().or(z.literal("")).nullable(),
   invoice_layout: z.enum(["classic", "modern", "minimal"]).optional(),
   invoice_show_signature: z.boolean().optional(),
+  usd_to_cdf: z.number().min(0.0001).optional(),
+  rate_source: z.enum(["manual", "api"]).optional(),
 });
+
 
 export const getSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -452,3 +455,97 @@ export const uploadProductImage = createServerFn({ method: "POST" })
     return { url: signed.signedUrl, path };
   });
 
+
+// -------- CATEGORIES CRUD --------
+const categoryInput = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().trim().min(2).max(120),
+  slug: z.string().trim().min(2).max(120).regex(/^[a-z0-9-]+$/),
+  description: z.string().trim().max(500).optional().or(z.literal("")),
+  position: z.number().int().min(0).default(0),
+});
+export const upsertCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => categoryInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertStaff(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const payload = { name: data.name, slug: data.slug, description: data.description || null, position: data.position };
+    const q = data.id
+      ? supabaseAdmin.from("categories").update(payload).eq("id", data.id).select().single()
+      : supabaseAdmin.from("categories").insert(payload).select().single();
+    const { data: row, error } = await q;
+    if (error) throw new Error(error.message);
+    return row;
+  });
+export const deleteCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), migrate_to: z.string().uuid().nullable().optional() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertStaff(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { count } = await supabaseAdmin.from("products").select("id", { count: "exact", head: true }).eq("category_id", data.id);
+    if ((count ?? 0) > 0) {
+      if (!data.migrate_to) throw new Error(`Cette catégorie contient ${count} produit(s). Choisissez une catégorie de destination.`);
+      const { error: mErr } = await supabaseAdmin.from("products").update({ category_id: data.migrate_to }).eq("category_id", data.id);
+      if (mErr) throw new Error(mErr.message);
+    }
+    const { error } = await supabaseAdmin.from("categories").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true, migrated: count ?? 0 };
+  });
+
+// -------- USERS (manual) --------
+const createUserInput = z.object({
+  email: z.string().email().max(160),
+  password: z.string().min(6).max(100),
+  full_name: z.string().trim().max(120).optional().or(z.literal("")),
+  role: z.enum(["admin", "manager", "staff", "customer"]),
+});
+export const createUserWithPassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => createUserInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
+      email: data.email, password: data.password, email_confirm: true,
+      user_metadata: data.full_name ? { full_name: data.full_name } : {},
+    });
+    if (error || !created.user) throw new Error(error?.message ?? "Erreur création");
+    await supabaseAdmin.from("user_roles").upsert(
+      { user_id: created.user.id, role: data.role },
+      { onConflict: "user_id,role", ignoreDuplicates: true },
+    );
+    return { id: created.user.id, email: created.user.email, role: data.role };
+  });
+export const resetUserPassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ user_id: z.string().uuid(), password: z.string().min(6).max(100) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, { password: data.password });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// -------- EXCHANGE RATE --------
+export const refreshExchangeRateFromAPI = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let rate = 0;
+    try {
+      const r = await fetch("https://open.er-api.com/v6/latest/USD");
+      const j = await r.json();
+      rate = Number(j?.rates?.CDF ?? 0);
+    } catch {}
+    if (!rate || rate < 100) throw new Error("Taux indisponible via l'API.");
+    const { error } = await supabaseAdmin.from("shop_settings")
+      .update({ usd_to_cdf: rate, rate_source: "api", rate_updated_at: new Date().toISOString() })
+      .eq("id", true);
+    if (error) throw new Error(error.message);
+    return { rate };
+  });
