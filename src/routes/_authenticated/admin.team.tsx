@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listTeam, assignRole, removeRole } from "@/lib/admin.functions";
+import { useState } from "react";
+import { listTeam, assignRole, removeRole, createUserWithPassword, resetUserPassword } from "@/lib/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, ShieldCheck, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { UserPlus, ShieldCheck, X, Copy, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/format";
 
@@ -27,9 +31,16 @@ function AdminTeam() {
   const fList = useServerFn(listTeam);
   const fAssign = useServerFn(assignRole);
   const fRemove = useServerFn(removeRole);
+  const fCreate = useServerFn(createUserWithPassword);
+  const fReset = useServerFn(resetUserPassword);
   const qc = useQueryClient();
-
   const q = useQuery({ queryKey: ["team"], queryFn: () => fList() });
+
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ email: "", password: "", full_name: "", role: "staff" as Role });
+  const [creating, setCreating] = useState(false);
+  const [resetFor, setResetFor] = useState<string | null>(null);
+  const [newPw, setNewPw] = useState("");
 
   async function add(user_id: string, role: Role) {
     try {
@@ -52,14 +63,35 @@ function AdminTeam() {
     }
   }
 
+  async function createUser(e: React.FormEvent) {
+    e.preventDefault();
+    setCreating(true);
+    try {
+      await fCreate({ data: form });
+      toast.success(`Utilisateur créé — partagez le lien : ${window.location.origin}/auth`);
+      setOpen(false); setForm({ email: "", password: "", full_name: "", role: "staff" });
+      qc.invalidateQueries({ queryKey: ["team"] });
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Erreur"); }
+    finally { setCreating(false); }
+  }
+  async function resetPw() {
+    if (!resetFor || newPw.length < 6) return;
+    try { await fReset({ data: { user_id: resetFor, password: newPw } }); toast.success("Mot de passe mis à jour"); setResetFor(null); setNewPw(""); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Erreur"); }
+  }
+  function copyLink() { navigator.clipboard.writeText(`${window.location.origin}/auth`); toast.success("Lien de connexion copié"); }
+
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold">Équipe & rôles</h1>
-        <p className="text-sm text-muted-foreground">
-          Attribuez des rôles aux personnes inscrites sur le site. Pour ajouter un nouvel
-          employé, demandez-lui d'abord de créer un compte sur <code>/auth</code>.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Utilisateurs</h1>
+          <p className="text-sm text-muted-foreground">Créez des comptes, attribuez les rôles, réinitialisez les mots de passe.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={copyLink}><Copy className="mr-1.5 size-4" /> Lien de connexion</Button>
+          <Button onClick={() => setOpen(true)} className="bg-gradient-brand text-brand-foreground"><UserPlus className="mr-1.5 size-4" /> Nouvel utilisateur</Button>
+        </div>
       </div>
 
       <Card className="overflow-hidden">
