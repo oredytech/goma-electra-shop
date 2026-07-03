@@ -113,10 +113,22 @@ function AdminProducts() {
           <h1 className="text-2xl font-bold">Produits</h1>
           <p className="text-sm text-muted-foreground">{prods.data?.length ?? 0} produit(s)</p>
         </div>
-        <Button onClick={openCreate} className="bg-gradient-brand text-brand-foreground">
-          <Plus className="mr-1.5 size-4" /> Nouveau produit
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setCatMgrOpen(true)} variant="outline">
+            <FolderCog className="mr-1.5 size-4" /> Catégories
+          </Button>
+          <Button onClick={openCreate} className="bg-gradient-brand text-brand-foreground">
+            <Plus className="mr-1.5 size-4" /> Nouveau produit
+          </Button>
+        </div>
       </div>
+
+      <CategoryManagerDialog
+        open={catMgrOpen} onOpenChange={setCatMgrOpen}
+        cats={cats.data ?? []}
+        onSave={async (payload) => { await fSaveCat({ data: payload }); qc.invalidateQueries({ queryKey: ["categories"] }); }}
+        onDelete={async (id, migrate_to) => { await fDelCat({ data: { id, migrate_to } }); qc.invalidateQueries({ queryKey: ["categories"] }); qc.invalidateQueries({ queryKey: ["admin-products"] }); }}
+      />
 
       <Card className="overflow-hidden p-0">
         <div className="overflow-x-auto">
@@ -173,7 +185,7 @@ function AdminProducts() {
               <div>
                 <Label>Nom *</Label>
                 <Input required value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value, slug: f.slug || slugify(e.target.value) }))} />
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value, slug: slugify(e.target.value) }))} />
               </div>
               <div>
                 <Label>Slug (URL) *</Label>
