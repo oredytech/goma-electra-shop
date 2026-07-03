@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { listCategories } from "@/lib/catalog.functions";
-import { listProductsAdmin, upsertProduct, deleteProduct, uploadProductImage } from "@/lib/admin.functions";
+import { listProductsAdmin, upsertProduct, deleteProduct, uploadProductImage, upsertCategory, deleteCategory } from "@/lib/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Upload, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, Loader2, FolderPlus, FolderCog } from "lucide-react";
 import { formatUSD } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -39,6 +39,8 @@ function AdminProducts() {
   const fSave = useServerFn(upsertProduct);
   const fDel = useServerFn(deleteProduct);
   const fUpload = useServerFn(uploadProductImage);
+  const fSaveCat = useServerFn(upsertCategory);
+  const fDelCat = useServerFn(deleteCategory);
 
 
   const prods = useQuery({ queryKey: ["admin-products"], queryFn: () => fList() });
@@ -48,6 +50,7 @@ function AdminProducts() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [catMgrOpen, setCatMgrOpen] = useState(false);
 
   async function handleFile(file: File) {
     if (!file) return;
