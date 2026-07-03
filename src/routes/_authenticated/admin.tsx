@@ -12,7 +12,7 @@ import {
 import {
   LayoutDashboard, Package, ShoppingCart, Warehouse, BarChart3, Settings,
   LogOut, Home, Users, ShieldCheck, Zap, Receipt, UserCog, Menu, Wallet, Activity,
-  HandCoins, Building2, UsersRound, MessageSquare, Lightbulb, TrendingUp,
+  HandCoins, Building2, UsersRound, MessageSquare, TrendingUp,
 } from "lucide-react";
 import { useState } from "react";
 import { DirectSaleDialog } from "@/components/DirectSaleDialog";
