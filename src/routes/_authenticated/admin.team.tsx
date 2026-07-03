@@ -142,10 +142,6 @@ function AdminTeam() {
                         </Button>
                       ))}
                       <Button size="sm" variant="ghost" onClick={() => setResetFor(u.id)}><KeyRound className="mr-1 size-3" /> mdp</Button>
-                        <Button key={r} size="sm" variant="outline" onClick={() => add(u.id, r)}>
-                          <UserPlus className="mr-1 size-3" /> {r}
-                        </Button>
-                      ))}
                     </div>
                   </td>
                 </tr>
@@ -157,6 +153,35 @@ function AdminTeam() {
           </table>
         </div>
       </Card>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Nouvel utilisateur</DialogTitle></DialogHeader>
+          <form onSubmit={createUser} className="space-y-3">
+            <div><Label>Nom complet</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></div>
+            <div><Label>Email *</Label><Input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+            <div><Label>Mot de passe *</Label><Input type="text" required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="≥ 6 caractères" /></div>
+            <div>
+              <Label>Rôle *</Label>
+              <select className="h-9 w-full rounded-md border bg-background px-2 text-sm" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })}>
+                {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+            <p className="text-xs text-muted-foreground">Après création, partagez avec la personne : <code>{typeof window !== "undefined" ? window.location.origin : ""}/auth</code></p>
+            <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setOpen(false)}>Annuler</Button><Button type="submit" disabled={creating} className="bg-gradient-brand text-brand-foreground">{creating ? "…" : "Créer"}</Button></div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!resetFor} onOpenChange={(o) => !o && setResetFor(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Réinitialiser le mot de passe</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <Input type="text" minLength={6} placeholder="Nouveau mot de passe" value={newPw} onChange={(e) => setNewPw(e.target.value)} />
+            <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setResetFor(null)}>Annuler</Button><Button onClick={resetPw} className="bg-gradient-brand text-brand-foreground">Enregistrer</Button></div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

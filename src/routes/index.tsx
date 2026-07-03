@@ -28,10 +28,12 @@ export const Route = createFileRoute("/")({
 });
 
 const services = [
-  { icon: Zap, title: "Installation électrique", desc: "Domestique & industrielle, aux normes." },
-  { icon: Wrench, title: "Maintenance & dépannage", desc: "Électrique et électronique, intervention rapide." },
-  { icon: Antenna, title: "Installation d'antennes", desc: "TV, satellite, parabole." },
-  { icon: Wifi, title: "Connexion Internet", desc: "Installation & configuration réseau / Wi-Fi." },
+  { icon: Wrench, title: "Maintenance", desc: "Dépannage électronique & électrique." },
+  { icon: Zap, title: "Électricité", desc: "Installations domestiques & industrielles." },
+  { icon: Wifi, title: "Froid & Climatisation", desc: "Installation et entretien clim / frigo." },
+  { icon: Antenna, title: "Réseaux", desc: "Wi-Fi, LAN, antennes & Internet." },
+  { icon: Package, title: "Décors intérieur", desc: "Aménagement lumineux et design." },
+  { icon: Wrench, title: "Développement web", desc: "Création de sites & applications." },
 ];
 
 const popularTags = ["câble électrique", "disjoncteur", "antenne TV", "routeur Wi-Fi", "ampoule LED"];
