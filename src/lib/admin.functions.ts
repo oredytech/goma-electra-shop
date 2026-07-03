@@ -224,7 +224,10 @@ const settingsInput = z.object({
   invoice_footer_text: z.string().trim().max(200).optional().or(z.literal("")).nullable(),
   invoice_layout: z.enum(["classic", "modern", "minimal"]).optional(),
   invoice_show_signature: z.boolean().optional(),
+  usd_to_cdf: z.number().min(0.0001).optional(),
+  rate_source: z.enum(["manual", "api"]).optional(),
 });
+
 
 export const getSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
