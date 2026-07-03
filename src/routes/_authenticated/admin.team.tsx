@@ -141,6 +141,11 @@ function AdminTeam() {
                           <UserPlus className="mr-1 size-3" /> {r}
                         </Button>
                       ))}
+                      <Button size="sm" variant="ghost" onClick={() => setResetFor(u.id)}><KeyRound className="mr-1 size-3" /> mdp</Button>
+                        <Button key={r} size="sm" variant="outline" onClick={() => add(u.id, r)}>
+                          <UserPlus className="mr-1 size-3" /> {r}
+                        </Button>
+                      ))}
                     </div>
                   </td>
                 </tr>
