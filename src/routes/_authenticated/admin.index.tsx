@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listOrders, listProductsAdmin } from "@/lib/admin.functions";
+import { listCredits } from "@/lib/customers.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +24,10 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 function AdminDashboard() {
   const fOrders = useServerFn(listOrders);
   const fProds = useServerFn(listProductsAdmin);
+  const fCredits = useServerFn(listCredits);
   const orders = useQuery({ queryKey: ["admin-orders"], queryFn: () => fOrders() });
   const prods = useQuery({ queryKey: ["admin-products"], queryFn: () => fProds() });
+  const credits = useQuery({ queryKey: ["credits"], queryFn: () => fCredits(), retry: false });
 
   const all = orders.data ?? [];
   const paid = all.filter((o: any) => o.status === "paid" || o.status === "delivered");
@@ -32,6 +35,8 @@ function AdminDashboard() {
   const revenue = paid.reduce((s: number, o: any) => s + Number(o.total), 0);
   const lowStock = (prods.data ?? []).filter((p: any) => p.stock <= p.min_stock);
   const outOfStock = (prods.data ?? []).filter((p: any) => p.stock === 0);
+  const overdueCredits = (credits.data ?? []).filter((c: any) => c.status === "overdue");
+  const overdueTotal = overdueCredits.reduce((s: number, c: any) => s + Number(c.balance), 0);
 
   // Sales over last 14 days
   const series = useMemo(() => {
@@ -186,6 +191,21 @@ function AdminDashboard() {
           </div>
         </Card>
       </div>
+
+      {overdueCredits.length > 0 && (
+        <Card className="relative overflow-hidden border-destructive/40 bg-gradient-to-br from-rose-50 via-red-50 to-orange-50 p-5">
+          <div className="absolute -right-8 -top-8 size-36 rounded-full bg-red-200/50 blur-3xl" />
+          <div className="relative flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="flex items-center gap-2 font-bold text-rose-800"><AlertTriangle className="size-4" /> Crédits en retard</h3>
+              <p className="text-xs text-rose-700/80">{overdueCredits.length} crédit(s) — solde total {formatUSD(overdueTotal)}</p>
+            </div>
+            <Button asChild size="sm" className="bg-rose-600 text-white hover:bg-rose-700"><Link to="/admin/credits">Relancer <ArrowUpRight className="ml-1 size-3.5" /></Link></Button>
+          </div>
+        </Card>
+      )}
+
+
 
       {/* Recent orders */}
       <Card className="p-5">

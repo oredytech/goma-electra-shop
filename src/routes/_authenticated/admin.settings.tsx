@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { getSettings, saveSettings } from "@/lib/admin.functions";
+import { getSettings, saveSettings, refreshExchangeRateFromAPI } from "@/lib/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -291,6 +291,10 @@ function AdminSettings() {
           </div>
         </Card>
 
+        <ExchangeRateCard />
+
+
+
         <div className="flex justify-end">
           <Button type="submit" disabled={saving} className="bg-gradient-brand text-brand-foreground">{saving ? "Enregistrement…" : "Enregistrer"}</Button>
         </div>
@@ -321,4 +325,45 @@ async function fileToDataUrl(file: File, maxWidth = 360): Promise<string> {
     img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
   });
+}
+
+function ExchangeRateCard() {
+  const fRefresh = useServerFn(refreshExchangeRateFromAPI);
+  const fGet = useServerFn(getSettings);
+  const q = useQuery({ queryKey: ["settings"], queryFn: () => fGet(), retry: false });
+  const [manual, setManual] = useState<number>(2800);
+  const [busy, setBusy] = useState(false);
+  const fSave = useServerFn(saveSettings);
+
+  useEffect(() => { if (q.data) setManual(Number((q.data as any).usd_to_cdf ?? 2800)); }, [q.data]);
+
+  async function refresh() {
+    setBusy(true);
+    try { const r = await fRefresh(); toast.success(`Taux mis à jour : 1 USD = ${r.rate.toFixed(2)} CDF`); q.refetch(); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Erreur"); }
+    finally { setBusy(false); }
+  }
+  async function saveManual() {
+    setBusy(true);
+    try { await fSave({ data: { usd_to_cdf: manual, rate_source: "manual" } as any }); toast.success("Taux manuel enregistré"); q.refetch(); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Erreur"); }
+    finally { setBusy(false); }
+  }
+  const d = q.data as any;
+
+  return (
+    <Card className="p-5">
+      <h3 className="flex items-center gap-2 font-semibold"><Globe className="size-4 text-accent" /> Taux de change USD → CDF</h3>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Actuel : <strong>1 USD = {Number(d?.usd_to_cdf ?? 2800).toFixed(2)} CDF</strong>
+        {d?.rate_source && <> · Source : {d.rate_source}</>}
+        {d?.rate_updated_at && <> · MAJ : {new Date(d.rate_updated_at).toLocaleString("fr-FR")}</>}
+      </p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+        <div><Label>Taux manuel (CDF pour 1 USD)</Label><Input type="number" step="0.01" min="1" value={manual} onChange={(e) => setManual(+e.target.value)} /></div>
+        <div className="flex items-end"><Button type="button" variant="outline" disabled={busy} onClick={saveManual}>Enregistrer</Button></div>
+        <div className="flex items-end"><Button type="button" disabled={busy} onClick={refresh} className="bg-gradient-brand text-brand-foreground">{busy ? "…" : "Actualiser via API"}</Button></div>
+      </div>
+    </Card>
+  );
 }

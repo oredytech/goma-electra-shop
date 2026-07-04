@@ -32,6 +32,8 @@ export function SiteHeader() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   const fSettings = useServerFn(getPublicSiteSettings);
   const settings = useQuery({ queryKey: ["public-settings"], queryFn: () => fSettings(), staleTime: 60_000 });
@@ -129,7 +131,7 @@ export function SiteHeader() {
             <SheetTrigger asChild>
               <Button variant="outline" size="sm" className="relative px-2.5">
                 <ShoppingCart className="size-4" />
-                {count > 0 && (
+                {mounted && count > 0 && (
                   <span className="absolute -right-1.5 -top-1.5 grid size-5 place-items-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
                     {count}
                   </span>

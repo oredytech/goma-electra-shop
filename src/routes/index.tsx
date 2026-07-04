@@ -13,6 +13,7 @@ import { listProducts, listCategories } from "@/lib/catalog.functions";
 import { formatUSD } from "@/lib/format";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { PublicForms } from "@/components/PublicForms";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
@@ -280,6 +281,7 @@ function HomePage() {
         </div>
       </section>
 
+      <PublicForms />
       <SiteFooter />
     </div>
   );
