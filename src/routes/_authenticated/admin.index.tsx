@@ -35,6 +35,8 @@ function AdminDashboard() {
   const revenue = paid.reduce((s: number, o: any) => s + Number(o.total), 0);
   const lowStock = (prods.data ?? []).filter((p: any) => p.stock <= p.min_stock);
   const outOfStock = (prods.data ?? []).filter((p: any) => p.stock === 0);
+  const overdueCredits = (credits.data ?? []).filter((c: any) => c.status === "overdue");
+  const overdueTotal = overdueCredits.reduce((s: number, c: any) => s + Number(c.balance), 0);
 
   // Sales over last 14 days
   const series = useMemo(() => {
