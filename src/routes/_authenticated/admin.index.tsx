@@ -24,8 +24,10 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 function AdminDashboard() {
   const fOrders = useServerFn(listOrders);
   const fProds = useServerFn(listProductsAdmin);
+  const fCredits = useServerFn(listCredits);
   const orders = useQuery({ queryKey: ["admin-orders"], queryFn: () => fOrders() });
   const prods = useQuery({ queryKey: ["admin-products"], queryFn: () => fProds() });
+  const credits = useQuery({ queryKey: ["credits"], queryFn: () => fCredits(), retry: false });
 
   const all = orders.data ?? [];
   const paid = all.filter((o: any) => o.status === "paid" || o.status === "delivered");
