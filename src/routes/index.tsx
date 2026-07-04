@@ -280,6 +280,7 @@ function HomePage() {
         </div>
       </section>
 
+      <PublicForms />
       <SiteFooter />
     </div>
   );
