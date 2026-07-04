@@ -32,6 +32,8 @@ export function SiteHeader() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   const fSettings = useServerFn(getPublicSiteSettings);
   const settings = useQuery({ queryKey: ["public-settings"], queryFn: () => fSettings(), staleTime: 60_000 });
