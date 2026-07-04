@@ -291,6 +291,10 @@ function AdminSettings() {
           </div>
         </Card>
 
+        <ExchangeRateCard />
+
+
+
         <div className="flex justify-end">
           <Button type="submit" disabled={saving} className="bg-gradient-brand text-brand-foreground">{saving ? "Enregistrement…" : "Enregistrer"}</Button>
         </div>
