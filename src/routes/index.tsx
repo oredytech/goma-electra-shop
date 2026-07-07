@@ -90,12 +90,23 @@ function HomePage() {
 
       {/* HERO — épuré, sous-titre = slider de services */}
       <section className="relative isolate overflow-hidden bg-[oklch(0.18_0.06_264)] text-white">
+        {services.map((s, i) => (
+          <img
+            key={s.title}
+            src={s.bg}
+            alt=""
+            aria-hidden="true"
+            className={`absolute inset-0 -z-10 h-full w-full object-cover transition-opacity duration-1000 ${i === slide ? "opacity-40" : "opacity-0"}`}
+          />
+        ))}
         <img
           src={heroImg}
-          alt="Équipe technique CONETEC"
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-35"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-10"
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[oklch(0.16_0.06_264)] via-[oklch(0.16_0.06_264)/0.85] to-[oklch(0.16_0.06_264)/0.3]" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[oklch(0.16_0.06_264)] via-[oklch(0.16_0.06_264)/0.85] to-[oklch(0.16_0.06_264)/0.35]" />
+
 
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:py-28">
           <div className="max-w-2xl">
