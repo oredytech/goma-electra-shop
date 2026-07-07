@@ -5,10 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
-  Wrench, Zap, Wifi, Antenna, Package,
-  Search, ArrowRight,
+  Wrench, Zap, Wifi, Package,
+  Search, ArrowRight, Sun, Camera, KeyRound, BellRing, Phone, Snowflake, Sparkles, Ruler,
 } from "lucide-react";
 import heroImg from "@/assets/hero-electrician.jpg";
+import sInstallation from "@/assets/services/electricite_domestique_6.webp.asset.json";
+import sMaintenance from "@/assets/services/electricite2.webp.asset.json";
+import sSolaire from "@/assets/services/electricite_domestique.webp.asset.json";
+import sCAD from "@/assets/services/decor_interieur.webp.asset.json";
+import sCCTV from "@/assets/services/video_surveillance.webp.asset.json";
+import sAccess from "@/assets/services/electricite_domestique_2.webp.asset.json";
+import sAlarm from "@/assets/services/habillement.webp.asset.json";
+import sVoIP from "@/assets/services/reseaux_informatique.webp.asset.json";
+import sFroid from "@/assets/services/climatisation_et_froid.webp.asset.json";
+import sDecor from "@/assets/services/decor_interrieur_2.webp.asset.json";
 import { listProducts, listCategories } from "@/lib/catalog.functions";
 import { formatUSD } from "@/lib/format";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -29,13 +39,19 @@ export const Route = createFileRoute("/")({
 });
 
 const services = [
-  { icon: Wrench, title: "Maintenance", desc: "Dépannage électronique & électrique." },
-  { icon: Zap, title: "Électricité", desc: "Installations domestiques & industrielles." },
-  { icon: Wifi, title: "Froid & Climatisation", desc: "Installation et entretien clim / frigo." },
-  { icon: Antenna, title: "Réseaux", desc: "Wi-Fi, LAN, antennes & Internet." },
-  { icon: Package, title: "Décors intérieur", desc: "Aménagement lumineux et design." },
-  { icon: Wrench, title: "Développement web", desc: "Création de sites & applications." },
+  { icon: Zap, title: "Installation électrique", desc: "Conception & pose conformes aux normes de sécurité.", bg: sInstallation.url, group: "Compétences techniques" },
+  { icon: Wrench, title: "Maintenance des équipements", desc: "Diagnostic de pannes, réparation & entretien.", bg: sMaintenance.url, group: "Compétences techniques" },
+  { icon: Sun, title: "Énergie solaire renouvelable", desc: "Photovoltaïque : conception à maintenance.", bg: sSolaire.url, group: "Compétences techniques" },
+  { icon: Ruler, title: "Outils logiciels (CAD)", desc: "AutoCAD, SketchUp — plans & schémas.", bg: sCAD.url, group: "Compétences techniques" },
+  { icon: Camera, title: "Vidéosurveillance CCTV", desc: "Installation & gestion des caméras.", bg: sCCTV.url, group: "Sécurité physique" },
+  { icon: KeyRound, title: "Contrôle d'accès", desc: "Systèmes d'accès sécurisés.", bg: sAccess.url, group: "Sécurité physique" },
+  { icon: BellRing, title: "Alarmes de sécurité", desc: "Détection d'intrusion & alertes instantanées.", bg: sAlarm.url, group: "Sécurité physique" },
+  { icon: Phone, title: "Téléphonie fixe & VoIP", desc: "Installation & maintenance téléphonie.", bg: sVoIP.url, group: "Sécurité physique" },
+  { icon: Snowflake, title: "Froid & climatisation", desc: "Installation et entretien clim / frigo.", bg: sFroid.url, group: "Confort & décor" },
+  { icon: Sparkles, title: "Décors intérieur", desc: "Aménagement lumineux & design.", bg: sDecor.url, group: "Confort & décor" },
+  { icon: Wifi, title: "Réseaux & Internet", desc: "Wi-Fi, LAN, antennes & liaisons.", bg: sVoIP.url, group: "Confort & décor" },
 ];
+
 
 const popularTags = ["câble électrique", "disjoncteur", "antenne TV", "routeur Wi-Fi", "ampoule LED"];
 
@@ -74,12 +90,23 @@ function HomePage() {
 
       {/* HERO — épuré, sous-titre = slider de services */}
       <section className="relative isolate overflow-hidden bg-[oklch(0.18_0.06_264)] text-white">
+        {services.map((s, i) => (
+          <img
+            key={s.title}
+            src={s.bg}
+            alt=""
+            aria-hidden="true"
+            className={`absolute inset-0 -z-10 h-full w-full object-cover transition-opacity duration-1000 ${i === slide ? "opacity-40" : "opacity-0"}`}
+          />
+        ))}
         <img
           src={heroImg}
-          alt="Équipe technique CONETEC"
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-35"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-10"
         />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[oklch(0.16_0.06_264)] via-[oklch(0.16_0.06_264)/0.85] to-[oklch(0.16_0.06_264)/0.3]" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[oklch(0.16_0.06_264)] via-[oklch(0.16_0.06_264)/0.85] to-[oklch(0.16_0.06_264)/0.35]" />
+
 
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:py-28">
           <div className="max-w-2xl">
