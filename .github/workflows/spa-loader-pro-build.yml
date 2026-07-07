@@ -1,0 +1,52 @@
+name: SPA Loader Pro Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_path:
+        description: Public base path, e.g. /app/my-spa/
+        required: false
+        default: /
+  repository_dispatch:
+    types: [spa-loader-pro-build]
+  push:
+    branches:
+      - "main"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        shell: bash
+        run: |
+          npm config set legacy-peer-deps true
+          npm install
+      - name: Build SPA (npm run build)
+        shell: bash
+        env:
+          SPA_LOADER_BASE_PATH: ${{ inputs.base_path }}
+          VITE_BASE_PATH: ${{ inputs.base_path }}
+          PUBLIC_URL: ${{ inputs.base_path }}
+        run: |
+          npm run build
+      - name: Locate build output
+        shell: bash
+        run: |
+          for dir in dist build out public .output/public; do
+            if [ -f "$dir/index.html" ]; then echo "BUILD_DIR=$dir" >> "$GITHUB_ENV"; exit 0; fi
+          done
+          echo "::error::No build output with index.html found (dist/build/out/public/.output/public)"
+          exit 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spa-loader-pro-build-${{ github.run_id }}
+          path: ${{ env.BUILD_DIR }}
+          if-no-files-found: error
