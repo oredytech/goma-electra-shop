@@ -105,7 +105,7 @@ function HomePage() {
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:py-28">
           <div className="max-w-2xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider backdrop-blur">
-              <Zap className="size-3.5 text-accent" /> Goma · RDC
+              <Zap className="size-3.5 text-accent" /> VOTRE PARTENAIRE TECHNIQUE
             </span>
             <h1 className="mt-4 text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl lg:text-6xl">
               L'ÉLECTRONIQUE,<br />
