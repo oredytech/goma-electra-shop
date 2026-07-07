@@ -99,12 +99,6 @@ function HomePage() {
             className={`absolute inset-0 -z-10 h-full w-full object-cover transition-opacity duration-1000 ${i === slide ? "opacity-40" : "opacity-0"}`}
           />
         ))}
-        <img
-          src={heroImg}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-10"
-        />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[oklch(0.16_0.06_264)] via-[oklch(0.16_0.06_264)/0.85] to-[oklch(0.16_0.06_264)/0.35]" />
 
 
