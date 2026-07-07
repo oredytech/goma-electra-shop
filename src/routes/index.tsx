@@ -8,7 +8,7 @@ import {
   Wrench, Zap, Wifi, Package,
   Search, ArrowRight, Sun, Camera, KeyRound, BellRing, Phone, Snowflake, Sparkles, Ruler,
 } from "lucide-react";
-import heroImg from "@/assets/hero-electrician.jpg";
+
 import sInstallation from "@/assets/services/electricite_domestique_6.webp.asset.json";
 import sMaintenance from "@/assets/services/electricite2.webp.asset.json";
 import sSolaire from "@/assets/services/electricite_domestique.webp.asset.json";
