@@ -269,17 +269,27 @@ function HomePage() {
             <span className="text-xs font-semibold uppercase tracking-wider text-accent">Nos services</span>
             <h2 className="mt-1.5 text-2xl font-bold sm:text-3xl">Techniciens qualifiés à votre porte</h2>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {services.map((s) => (
-              <Card key={s.title} className="border-border p-5 transition hover:shadow-brand">
-                <div className="mb-3 grid size-11 place-items-center rounded-xl bg-gradient-brand text-brand-foreground">
-                  <s.icon className="size-5" />
+              <Card key={s.title} className="group overflow-hidden border-border p-0 transition hover:-translate-y-0.5 hover:shadow-brand">
+                <div className="relative aspect-[16/10] w-full overflow-hidden">
+                  <img src={s.bg} alt={s.title} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute left-3 top-3 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur">
+                    {s.group}
+                  </div>
+                  <div className="absolute bottom-3 left-3 grid size-11 place-items-center rounded-xl bg-gradient-brand text-brand-foreground shadow-lg">
+                    <s.icon className="size-5" />
+                  </div>
                 </div>
-                <h3 className="text-base font-semibold">{s.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{s.desc}</p>
+                <div className="p-5">
+                  <h3 className="text-base font-semibold">{s.title}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{s.desc}</p>
+                </div>
               </Card>
             ))}
           </div>
+
         </div>
       </section>
 
