@@ -73,6 +73,7 @@ export type Database = {
       }
       contact_messages: {
         Row: {
+          admin_reply: string | null
           created_at: string
           email: string | null
           handled: boolean
@@ -80,9 +81,11 @@ export type Database = {
           message: string
           name: string
           phone: string | null
+          replied_at: string | null
           subject: string | null
         }
         Insert: {
+          admin_reply?: string | null
           created_at?: string
           email?: string | null
           handled?: boolean
@@ -90,9 +93,11 @@ export type Database = {
           message: string
           name: string
           phone?: string | null
+          replied_at?: string | null
           subject?: string | null
         }
         Update: {
+          admin_reply?: string | null
           created_at?: string
           email?: string | null
           handled?: boolean
@@ -100,6 +105,7 @@ export type Database = {
           message?: string
           name?: string
           phone?: string | null
+          replied_at?: string | null
           subject?: string | null
         }
         Relationships: []
@@ -579,30 +585,36 @@ export type Database = {
       }
       product_suggestions: {
         Row: {
+          admin_reply: string | null
           created_at: string
           description: string | null
           id: string
           product_name: string
+          replied_at: string | null
           status: string
           suggester_email: string | null
           suggester_name: string | null
           suggester_phone: string | null
         }
         Insert: {
+          admin_reply?: string | null
           created_at?: string
           description?: string | null
           id?: string
           product_name: string
+          replied_at?: string | null
           status?: string
           suggester_email?: string | null
           suggester_name?: string | null
           suggester_phone?: string | null
         }
         Update: {
+          admin_reply?: string | null
           created_at?: string
           description?: string | null
           id?: string
           product_name?: string
+          replied_at?: string | null
           status?: string
           suggester_email?: string | null
           suggester_name?: string | null
