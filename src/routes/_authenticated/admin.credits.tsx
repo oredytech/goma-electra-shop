@@ -166,7 +166,12 @@ function AdminCredits() {
           <DialogHeader><DialogTitle>Nouveau crédit client</DialogTitle></DialogHeader>
           <form onSubmit={submit} className="space-y-3">
             <div>
-              <Label>Client *</Label>
+              <div className="flex items-center justify-between">
+                <Label>Client *</Label>
+                <Button type="button" size="sm" variant="ghost" className="h-6 gap-1 px-2 text-xs text-accent" onClick={() => setNewCust({ ...newCust, open: true })}>
+                  <UserPlus className="size-3.5" /> Nouveau client
+                </Button>
+              </div>
               <select required className="h-9 w-full rounded-md border bg-background px-2 text-sm" value={form.customer_id} onChange={(e) => setForm({ ...form, customer_id: e.target.value })}>
                 <option value="">— Choisir —</option>
                 {(cust.data ?? []).map((c: any) => <option key={c.id} value={c.id}>{c.full_name} {c.phone ? `— ${c.phone}` : ""}</option>)}
