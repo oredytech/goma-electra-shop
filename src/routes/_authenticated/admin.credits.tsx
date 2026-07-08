@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { listCustomers } from "@/lib/customers.functions";
+import { listCustomers, upsertCustomer } from "@/lib/customers.functions";
 import { listCredits, upsertCredit, deleteCredit, addCreditPayment } from "@/lib/customers.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Trash2, HandCoins, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, HandCoins, AlertTriangle, UserPlus, FileDown } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
+import { buildReportPDF } from "@/lib/report-pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/credits")({
   component: AdminCredits,
