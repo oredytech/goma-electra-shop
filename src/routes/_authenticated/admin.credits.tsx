@@ -133,6 +133,7 @@ function AdminCredits() {
                 <th className="px-3 py-2.5">Libellé</th>
                 <th className="px-3 py-2.5 text-right">Montant</th>
                 <th className="px-3 py-2.5 text-right">Solde</th>
+                <th className="px-3 py-2.5">Enregistré</th>
                 <th className="px-3 py-2.5">Échéance</th>
                 <th className="px-3 py-2.5">Statut</th>
                 <th className="px-3 py-2.5"></th>
@@ -145,6 +146,7 @@ function AdminCredits() {
                   <td className="px-3 py-2.5">{c.label}</td>
                   <td className="px-3 py-2.5 text-right">{Number(c.amount).toFixed(2)} {c.currency}</td>
                   <td className="px-3 py-2.5 text-right font-semibold">{Number(c.balance).toFixed(2)} {c.currency}</td>
+                  <td className="px-3 py-2.5 text-xs text-muted-foreground">{formatDate(c.created_at)}</td>
                   <td className="px-3 py-2.5 text-xs">{c.due_date ? formatDate(c.due_date) : "—"}</td>
                   <td className="px-3 py-2.5"><Badge className={statusColor[c.status] ?? ""}>{c.status}</Badge></td>
                   <td className="px-3 py-2.5 text-right">
@@ -153,7 +155,7 @@ function AdminCredits() {
                   </td>
                 </tr>
               ))}
-              {list.data?.length === 0 && <tr><td colSpan={7} className="px-3 py-10 text-center text-muted-foreground">Aucun crédit enregistré.</td></tr>}
+              {list.data?.length === 0 && <tr><td colSpan={8} className="px-3 py-10 text-center text-muted-foreground">Aucun crédit enregistré.</td></tr>}
             </tbody>
           </table>
         </div>
