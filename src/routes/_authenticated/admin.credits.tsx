@@ -69,6 +69,18 @@ function AdminCredits() {
     } catch (e) { toast.error(e instanceof Error ? e.message : "Erreur"); }
   }
 
+  async function createNewCustomer(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newCust.full_name.trim()) return;
+    try {
+      const created = await fNewCust({ data: { full_name: newCust.full_name.trim(), phone: newCust.phone, email: newCust.email } });
+      toast.success("Client ajouté au répertoire");
+      await qc.invalidateQueries({ queryKey: ["customers"] });
+      setForm((f) => ({ ...f, customer_id: (created as any).id }));
+      setNewCust({ open: false, full_name: "", phone: "", email: "" });
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Erreur"); }
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
