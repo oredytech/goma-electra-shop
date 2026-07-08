@@ -55,7 +55,7 @@ function AdminTreasury() {
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.text("Rapport de trésorerie", 14, 16);
+    doc.text("Rapport de caisse", 14, 16);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.text(`Période : ${from} → ${to}`, W - 14, 16, { align: "right" });
