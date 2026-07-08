@@ -45,7 +45,7 @@ const navFinance: NavItem[] = [
   { to: "/admin/expenses", label: "Dépenses", icon: Receipt, roles: ["admin", "manager"] },
   { to: "/admin/rent", label: "Loyer", icon: Building2, roles: ["admin", "manager"] },
   { to: "/admin/employees", label: "Employés & salaires", icon: UserCog, roles: ["admin", "manager"] },
-  { to: "/admin/treasury", label: "Trésorerie", icon: Wallet, roles: ["admin", "manager"] },
+  { to: "/admin/treasury", label: "Caisse", icon: Wallet, roles: ["admin", "manager"] },
   { to: "/admin/reports", label: "Rapports", icon: BarChart3, roles: ["admin", "manager"] },
   { to: "/admin/activity", label: "Historique", icon: Activity, roles: ["admin", "manager"] },
 ];

@@ -1,14 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { treasuryReport, type TreasuryReport } from "@/lib/treasury.functions";
+import { listProductsAdmin } from "@/lib/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatUSD } from "@/lib/format";
-import { TrendingUp, TrendingDown, Wallet, FileDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, FileDown, AlertTriangle, PackageX } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
   BarChart, Bar, Legend, PieChart, Pie, Cell,
@@ -32,14 +33,18 @@ function AdminTreasury() {
   const [to, setTo] = useState(today.toISOString().slice(0, 10));
 
   const fRep = useServerFn(treasuryReport);
+  const fProds = useServerFn(listProductsAdmin);
   const q = useQuery({
     queryKey: ["treasury", from, to],
     queryFn: () => fRep({ data: { from: startOfDay(new Date(from)).toISOString(), to: endOfDay(new Date(to)).toISOString() } }),
   });
+  const prods = useQuery({ queryKey: ["admin-products"], queryFn: () => fProds() });
 
   const r = q.data;
-
   const series = useMemo(() => r?.byDay ?? [], [r]);
+
+  const lowStock = useMemo(() => (prods.data ?? []).filter((p: any) => p.is_active && p.stock <= (p.min_stock ?? 0)), [prods.data]);
+  const outOfStock = useMemo(() => lowStock.filter((p: any) => p.stock <= 0), [lowStock]);
 
   function exportPdf() {
     if (!r) return;
@@ -50,7 +55,7 @@ function AdminTreasury() {
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.text("Rapport de trésorerie", 14, 16);
+    doc.text("Rapport de caisse", 14, 16);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.text(`Période : ${from} → ${to}`, W - 14, 16, { align: "right" });
@@ -82,20 +87,46 @@ function AdminTreasury() {
         headStyles: { fillColor: [0, 121, 111] },
       });
     }
-    doc.save(`Tresorerie-${from}_${to}.pdf`);
+    doc.save(`Caisse-${from}_${to}.pdf`);
   }
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Trésorerie</h1>
-          <p className="text-sm text-muted-foreground">Revenus, dépenses & salaires consolidés.</p>
+          <h1 className="flex items-center gap-2 text-2xl font-bold"><Wallet className="size-6 text-accent" /> Caisse</h1>
+          <p className="text-sm text-muted-foreground">Situation financière consolidée : revenus, dépenses, salaires & alertes de stock.</p>
         </div>
-        <Button onClick={exportPdf} disabled={!r} className="bg-gradient-brand text-brand-foreground">
-          <FileDown className="mr-1.5 size-4" /> Télécharger le rapport PDF
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline"><Link to="/admin/stock">Voir le stock</Link></Button>
+          <Button onClick={exportPdf} disabled={!r} className="bg-gradient-brand text-brand-foreground">
+            <FileDown className="mr-1.5 size-4" /> Télécharger le rapport PDF
+          </Button>
+        </div>
       </div>
+
+      {(outOfStock.length > 0 || lowStock.length > 0) && (
+        <Card className={`p-4 ${outOfStock.length ? "border-destructive/40 bg-destructive/5" : "border-amber-300 bg-amber-50"}`}>
+          <div className="flex items-start gap-3">
+            {outOfStock.length > 0 ? <PackageX className="mt-0.5 size-5 text-destructive" /> : <AlertTriangle className="mt-0.5 size-5 text-amber-600" />}
+            <div className="min-w-0 flex-1">
+              <div className={`text-sm font-semibold ${outOfStock.length ? "text-destructive" : "text-amber-800"}`}>
+                {outOfStock.length > 0 && <>{outOfStock.length} produit(s) en rupture de stock · </>}
+                {lowStock.length - outOfStock.length > 0 && <>{lowStock.length - outOfStock.length} produit(s) sous le seuil minimum</>}
+              </div>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {lowStock.slice(0, 10).map((p: any) => (
+                  <span key={p.id} className={`rounded-full border px-2 py-0.5 text-xs ${p.stock <= 0 ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-amber-300 bg-white text-amber-800"}`}>
+                    {p.name} — stock {p.stock}
+                  </span>
+                ))}
+                {lowStock.length > 10 && <span className="text-xs text-muted-foreground">+{lowStock.length - 10} autres…</span>}
+              </div>
+            </div>
+            <Button asChild size="sm" variant="outline"><Link to="/admin/stock">Réapprovisionner</Link></Button>
+          </div>
+        </Card>
+      )}
 
       <Card className="p-4">
         <div className="flex flex-wrap items-end gap-3">

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { listCustomers } from "@/lib/customers.functions";
+import { listCustomers, upsertCustomer } from "@/lib/customers.functions";
 import { listCredits, upsertCredit, deleteCredit, addCreditPayment } from "@/lib/customers.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Trash2, HandCoins, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, HandCoins, AlertTriangle, UserPlus, FileDown } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
+import { buildReportPDF } from "@/lib/report-pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/credits")({
   component: AdminCredits,
@@ -32,6 +33,7 @@ function AdminCredits() {
   const fSave = useServerFn(upsertCredit);
   const fDel = useServerFn(deleteCredit);
   const fPay = useServerFn(addCreditPayment);
+  const fNewCust = useServerFn(upsertCustomer);
 
   const list = useQuery({ queryKey: ["credits"], queryFn: () => fList() });
   const cust = useQuery({ queryKey: ["customers"], queryFn: () => fCust() });
@@ -40,6 +42,7 @@ function AdminCredits() {
   const [form, setForm] = useState({ customer_id: "", label: "", amount: 0, currency: "USD" as "USD" | "CDF", due_date: "", notes: "" });
   const [payOpen, setPayOpen] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState(0);
+  const [newCust, setNewCust] = useState<{ open: boolean; full_name: string; phone: string; email: string }>({ open: false, full_name: "", phone: "", email: "" });
 
   const overdue = (list.data ?? []).filter((c: any) => c.status === "overdue");
 
@@ -66,6 +69,18 @@ function AdminCredits() {
     } catch (e) { toast.error(e instanceof Error ? e.message : "Erreur"); }
   }
 
+  async function createNewCustomer(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newCust.full_name.trim()) return;
+    try {
+      const created = await fNewCust({ data: { full_name: newCust.full_name.trim(), phone: newCust.phone, email: newCust.email } });
+      toast.success("Client ajouté au répertoire");
+      await qc.invalidateQueries({ queryKey: ["customers"] });
+      setForm((f) => ({ ...f, customer_id: (created as any).id }));
+      setNewCust({ open: false, full_name: "", phone: "", email: "" });
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Erreur"); }
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -73,7 +88,34 @@ function AdminCredits() {
           <h1 className="flex items-center gap-2 text-2xl font-bold"><HandCoins className="size-6 text-accent" /> Crédits & dettes</h1>
           <p className="text-sm text-muted-foreground">Suivi des crédits accordés, rappels & paiements partiels.</p>
         </div>
-        <Button onClick={() => setOpen(true)} className="bg-gradient-brand text-brand-foreground"><Plus className="mr-1.5 size-4" /> Nouveau crédit</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => {
+            const rows = list.data ?? [];
+            const total = rows.reduce((s: number, c: any) => s + Number(c.balance), 0);
+            buildReportPDF({
+              title: "Rapport — Crédits & dettes clients",
+              subtitle: `Édité le ${new Date().toLocaleDateString("fr-FR")}`,
+              filename: `Credits-${new Date().toISOString().slice(0, 10)}.pdf`,
+              summary: [
+                { label: "Nombre de crédits", value: String(rows.length) },
+                { label: "En retard", value: String(overdue.length) },
+                { label: "Solde total à recouvrer", value: total.toFixed(2), bold: true },
+              ],
+              sections: [{
+                head: ["Client", "Libellé", "Enregistré", "Échéance", "Montant", "Solde", "Statut"],
+                body: rows.map((c: any) => [
+                  c.customers?.full_name ?? "—", c.label,
+                  formatDate(c.created_at),
+                  c.due_date ? formatDate(c.due_date) : "—",
+                  `${Number(c.amount).toFixed(2)} ${c.currency}`,
+                  `${Number(c.balance).toFixed(2)} ${c.currency}`,
+                  c.status,
+                ]),
+              }],
+            });
+          }} disabled={!list.data?.length}><FileDown className="mr-1.5 size-4" /> Rapport PDF</Button>
+          <Button onClick={() => setOpen(true)} className="bg-gradient-brand text-brand-foreground"><Plus className="mr-1.5 size-4" /> Nouveau crédit</Button>
+        </div>
       </div>
 
       {overdue.length > 0 && (
@@ -91,6 +133,7 @@ function AdminCredits() {
                 <th className="px-3 py-2.5">Libellé</th>
                 <th className="px-3 py-2.5 text-right">Montant</th>
                 <th className="px-3 py-2.5 text-right">Solde</th>
+                <th className="px-3 py-2.5">Enregistré</th>
                 <th className="px-3 py-2.5">Échéance</th>
                 <th className="px-3 py-2.5">Statut</th>
                 <th className="px-3 py-2.5"></th>
@@ -103,6 +146,7 @@ function AdminCredits() {
                   <td className="px-3 py-2.5">{c.label}</td>
                   <td className="px-3 py-2.5 text-right">{Number(c.amount).toFixed(2)} {c.currency}</td>
                   <td className="px-3 py-2.5 text-right font-semibold">{Number(c.balance).toFixed(2)} {c.currency}</td>
+                  <td className="px-3 py-2.5 text-xs text-muted-foreground">{formatDate(c.created_at)}</td>
                   <td className="px-3 py-2.5 text-xs">{c.due_date ? formatDate(c.due_date) : "—"}</td>
                   <td className="px-3 py-2.5"><Badge className={statusColor[c.status] ?? ""}>{c.status}</Badge></td>
                   <td className="px-3 py-2.5 text-right">
@@ -111,7 +155,7 @@ function AdminCredits() {
                   </td>
                 </tr>
               ))}
-              {list.data?.length === 0 && <tr><td colSpan={7} className="px-3 py-10 text-center text-muted-foreground">Aucun crédit enregistré.</td></tr>}
+              {list.data?.length === 0 && <tr><td colSpan={8} className="px-3 py-10 text-center text-muted-foreground">Aucun crédit enregistré.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -122,7 +166,12 @@ function AdminCredits() {
           <DialogHeader><DialogTitle>Nouveau crédit client</DialogTitle></DialogHeader>
           <form onSubmit={submit} className="space-y-3">
             <div>
-              <Label>Client *</Label>
+              <div className="flex items-center justify-between">
+                <Label>Client *</Label>
+                <Button type="button" size="sm" variant="ghost" className="h-6 gap-1 px-2 text-xs text-accent" onClick={() => setNewCust({ ...newCust, open: true })}>
+                  <UserPlus className="size-3.5" /> Nouveau client
+                </Button>
+              </div>
               <select required className="h-9 w-full rounded-md border bg-background px-2 text-sm" value={form.customer_id} onChange={(e) => setForm({ ...form, customer_id: e.target.value })}>
                 <option value="">— Choisir —</option>
                 {(cust.data ?? []).map((c: any) => <option key={c.id} value={c.id}>{c.full_name} {c.phone ? `— ${c.phone}` : ""}</option>)}
@@ -150,6 +199,21 @@ function AdminCredits() {
             <div><Label>Montant reçu</Label><Input type="number" step="0.01" min="0" value={payAmount} onChange={(e) => setPayAmount(+e.target.value)} /></div>
             <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setPayOpen(null)}>Annuler</Button><Button onClick={pay} className="bg-gradient-brand text-brand-foreground">Encaisser</Button></div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={newCust.open} onOpenChange={(o) => setNewCust({ ...newCust, open: o })}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Nouveau client</DialogTitle></DialogHeader>
+          <form onSubmit={createNewCustomer} className="space-y-3">
+            <div><Label>Nom complet *</Label><Input required value={newCust.full_name} onChange={(e) => setNewCust({ ...newCust, full_name: e.target.value })} /></div>
+            <div><Label>Téléphone</Label><Input value={newCust.phone} onChange={(e) => setNewCust({ ...newCust, phone: e.target.value })} /></div>
+            <div><Label>Email</Label><Input type="email" value={newCust.email} onChange={(e) => setNewCust({ ...newCust, email: e.target.value })} /></div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setNewCust({ ...newCust, open: false })}>Annuler</Button>
+              <Button type="submit" className="bg-gradient-brand text-brand-foreground">Ajouter</Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

@@ -10,9 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, Trash2, Edit, DollarSign, Users } from "lucide-react";
+import { Plus, Trash2, Edit, DollarSign, Users, FileDown } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
+import { buildReportPDF } from "@/lib/report-pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/employees")({
   component: AdminEmployees,
@@ -87,7 +88,39 @@ function AdminEmployees() {
           <h1 className="text-2xl font-bold">Employés & salaires</h1>
           <p className="text-sm text-muted-foreground">Gérez l'équipe et les paiements de salaire.</p>
         </div>
-        <Button onClick={openNew} className="bg-gradient-brand text-brand-foreground"><Plus className="mr-1.5 size-4" /> Nouvel employé</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => {
+            const emps = emp.data ?? [];
+            const ps = pays.data ?? [];
+            const totalPaid = ps.reduce((s: number, p: any) => s + Number(p.amount), 0);
+            buildReportPDF({
+              title: "Rapport — Employés & salaires",
+              subtitle: `Édité le ${new Date().toLocaleDateString("fr-FR")}`,
+              filename: `Employes-Salaires-${new Date().toISOString().slice(0, 10)}.pdf`,
+              summary: [
+                { label: "Effectif total", value: String(emps.length) },
+                { label: "Actifs", value: String(emps.filter((e: any) => e.is_active).length) },
+                { label: "Total salaires versés", value: `${totalPaid.toFixed(2)}`, bold: true },
+              ],
+              sections: [
+                {
+                  title: "Équipe",
+                  head: ["Nom", "Poste", "Téléphone", "Salaire", "État"],
+                  body: emps.map((e: any) => [e.full_name, e.role ?? "—", e.phone ?? "—", `${Number(e.monthly_salary).toFixed(2)} ${e.currency}`, e.is_active ? "Actif" : "Inactif"]),
+                },
+                {
+                  title: "Historique des salaires",
+                  color: [0, 121, 111],
+                  head: ["Période", "Employé", "Montant", "Mode", "Payé le"],
+                  body: ps.map((p: any) => [p.period_month?.slice(0, 7) ?? "—", p.employees?.full_name ?? "—", `${Number(p.amount).toFixed(2)} ${p.currency}`, p.payment_method, p.paid_at ? formatDate(p.paid_at) : "—"]),
+                },
+              ],
+            });
+          }} disabled={!emp.data}>
+            <FileDown className="mr-1.5 size-4" /> Rapport PDF
+          </Button>
+          <Button onClick={openNew} className="bg-gradient-brand text-brand-foreground"><Plus className="mr-1.5 size-4" /> Nouvel employé</Button>
+        </div>
       </div>
 
       <Tabs defaultValue="staff">
