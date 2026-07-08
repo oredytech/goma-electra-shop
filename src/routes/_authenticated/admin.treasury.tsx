@@ -87,7 +87,7 @@ function AdminTreasury() {
         headStyles: { fillColor: [0, 121, 111] },
       });
     }
-    doc.save(`Tresorerie-${from}_${to}.pdf`);
+    doc.save(`Caisse-${from}_${to}.pdf`);
   }
 
   return (
