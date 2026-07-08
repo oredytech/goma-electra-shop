@@ -10,9 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, Trash2, Edit, DollarSign, Users } from "lucide-react";
+import { Plus, Trash2, Edit, DollarSign, Users, FileDown } from "lucide-react";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
+import { buildReportPDF } from "@/lib/report-pdf";
 
 export const Route = createFileRoute("/_authenticated/admin/employees")({
   component: AdminEmployees,
