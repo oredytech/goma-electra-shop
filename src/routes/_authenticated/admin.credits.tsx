@@ -33,6 +33,7 @@ function AdminCredits() {
   const fSave = useServerFn(upsertCredit);
   const fDel = useServerFn(deleteCredit);
   const fPay = useServerFn(addCreditPayment);
+  const fNewCust = useServerFn(upsertCustomer);
 
   const list = useQuery({ queryKey: ["credits"], queryFn: () => fList() });
   const cust = useQuery({ queryKey: ["customers"], queryFn: () => fCust() });
@@ -41,6 +42,7 @@ function AdminCredits() {
   const [form, setForm] = useState({ customer_id: "", label: "", amount: 0, currency: "USD" as "USD" | "CDF", due_date: "", notes: "" });
   const [payOpen, setPayOpen] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState(0);
+  const [newCust, setNewCust] = useState<{ open: boolean; full_name: string; phone: string; email: string }>({ open: false, full_name: "", phone: "", email: "" });
 
   const overdue = (list.data ?? []).filter((c: any) => c.status === "overdue");
 
