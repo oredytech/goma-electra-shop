@@ -88,7 +88,34 @@ function AdminCredits() {
           <h1 className="flex items-center gap-2 text-2xl font-bold"><HandCoins className="size-6 text-accent" /> Crédits & dettes</h1>
           <p className="text-sm text-muted-foreground">Suivi des crédits accordés, rappels & paiements partiels.</p>
         </div>
-        <Button onClick={() => setOpen(true)} className="bg-gradient-brand text-brand-foreground"><Plus className="mr-1.5 size-4" /> Nouveau crédit</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => {
+            const rows = list.data ?? [];
+            const total = rows.reduce((s: number, c: any) => s + Number(c.balance), 0);
+            buildReportPDF({
+              title: "Rapport — Crédits & dettes clients",
+              subtitle: `Édité le ${new Date().toLocaleDateString("fr-FR")}`,
+              filename: `Credits-${new Date().toISOString().slice(0, 10)}.pdf`,
+              summary: [
+                { label: "Nombre de crédits", value: String(rows.length) },
+                { label: "En retard", value: String(overdue.length) },
+                { label: "Solde total à recouvrer", value: total.toFixed(2), bold: true },
+              ],
+              sections: [{
+                head: ["Client", "Libellé", "Enregistré", "Échéance", "Montant", "Solde", "Statut"],
+                body: rows.map((c: any) => [
+                  c.customers?.full_name ?? "—", c.label,
+                  formatDate(c.created_at),
+                  c.due_date ? formatDate(c.due_date) : "—",
+                  `${Number(c.amount).toFixed(2)} ${c.currency}`,
+                  `${Number(c.balance).toFixed(2)} ${c.currency}`,
+                  c.status,
+                ]),
+              }],
+            });
+          }} disabled={!list.data?.length}><FileDown className="mr-1.5 size-4" /> Rapport PDF</Button>
+          <Button onClick={() => setOpen(true)} className="bg-gradient-brand text-brand-foreground"><Plus className="mr-1.5 size-4" /> Nouveau crédit</Button>
+        </div>
       </div>
 
       {overdue.length > 0 && (
