@@ -112,3 +112,28 @@ export const updateSuggestionStatus = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const replyContactMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), reply: z.string().trim().min(1).max(4000) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertStaff(context);
+    const { error } = await context.supabase.from("contact_messages")
+      .update({ admin_reply: data.reply, replied_at: new Date().toISOString(), handled: true })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const replyProductSuggestion = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), reply: z.string().trim().min(1).max(4000) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertStaff(context);
+    const { error } = await context.supabase.from("product_suggestions")
+      .update({ admin_reply: data.reply, replied_at: new Date().toISOString() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
