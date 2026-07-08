@@ -33,14 +33,18 @@ function AdminTreasury() {
   const [to, setTo] = useState(today.toISOString().slice(0, 10));
 
   const fRep = useServerFn(treasuryReport);
+  const fProds = useServerFn(listProductsAdmin);
   const q = useQuery({
     queryKey: ["treasury", from, to],
     queryFn: () => fRep({ data: { from: startOfDay(new Date(from)).toISOString(), to: endOfDay(new Date(to)).toISOString() } }),
   });
+  const prods = useQuery({ queryKey: ["admin-products"], queryFn: () => fProds() });
 
   const r = q.data;
-
   const series = useMemo(() => r?.byDay ?? [], [r]);
+
+  const lowStock = useMemo(() => (prods.data ?? []).filter((p: any) => p.is_active && p.stock <= (p.min_stock ?? 0)), [prods.data]);
+  const outOfStock = useMemo(() => lowStock.filter((p: any) => p.stock <= 0), [lowStock]);
 
   function exportPdf() {
     if (!r) return;
