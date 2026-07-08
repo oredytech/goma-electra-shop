@@ -201,6 +201,21 @@ function AdminCredits() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={newCust.open} onOpenChange={(o) => setNewCust({ ...newCust, open: o })}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Nouveau client</DialogTitle></DialogHeader>
+          <form onSubmit={createNewCustomer} className="space-y-3">
+            <div><Label>Nom complet *</Label><Input required value={newCust.full_name} onChange={(e) => setNewCust({ ...newCust, full_name: e.target.value })} /></div>
+            <div><Label>Téléphone</Label><Input value={newCust.phone} onChange={(e) => setNewCust({ ...newCust, phone: e.target.value })} /></div>
+            <div><Label>Email</Label><Input type="email" value={newCust.email} onChange={(e) => setNewCust({ ...newCust, email: e.target.value })} /></div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setNewCust({ ...newCust, open: false })}>Annuler</Button>
+              <Button type="submit" className="bg-gradient-brand text-brand-foreground">Ajouter</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
