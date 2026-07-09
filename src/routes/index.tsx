@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useServerFn } from "@/lib/tanstack-start-compat";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,6 @@ import {
   Wrench, Zap, Wifi, Package,
   Search, ArrowRight, Sun, Camera, KeyRound, BellRing, Phone, Snowflake, Sparkles, Ruler,
 } from "lucide-react";
-
 import sInstallation from "@/assets/services/electricite_domestique_6.webp.asset.json";
 import sMaintenance from "@/assets/services/electricite2.webp.asset.json";
 import sSolaire from "@/assets/services/electricite_domestique.webp.asset.json";
@@ -90,15 +89,17 @@ function HomePage() {
 
       {/* HERO — épuré, sous-titre = slider de services */}
       <section className="relative isolate overflow-hidden bg-[oklch(0.18_0.06_264)] text-white">
-        {services.map((s, i) => (
-          <img
-            key={s.title}
-            src={s.bg}
-            alt=""
-            aria-hidden="true"
-            className={`absolute inset-0 -z-10 h-full w-full object-cover transition-opacity duration-1000 ${i === slide ? "opacity-40" : "opacity-0"}`}
-          />
-        ))}
+        <div className="absolute inset-0 -z-10">
+          {services.map((s, i) => (
+            <div
+              key={s.title}
+              aria-hidden={i !== slide}
+              className={`absolute inset-0 h-full w-full transition-opacity duration-1000 ${i === slide ? "opacity-100" : "opacity-0"}`}
+            >
+              <img src={s.bg} alt="" className="h-full w-full object-cover" />
+            </div>
+          ))}
+        </div>
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[oklch(0.16_0.06_264)] via-[oklch(0.16_0.06_264)/0.85] to-[oklch(0.16_0.06_264)/0.35]" />
 
 

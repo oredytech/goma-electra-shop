@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useServerFn } from "@/lib/tanstack-start-compat";
 import { useMemo, useState } from "react";
 import { listActivity } from "@/lib/activity.functions";
 import { Card } from "@/components/ui/card";

@@ -1,6 +1,5 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import {
   MapPin, Phone, Mail, Clock, Facebook, MessageCircle,
   Instagram, Linkedin, Youtube, Twitter, Globe, Map as MapIcon, Music2, Heart,
@@ -9,8 +8,7 @@ import logoAsset from "@/assets/conetec-logo.png.asset.json";
 import { getPublicSiteSettings } from "@/lib/site-settings.functions";
 
 export function SiteFooter() {
-  const f = useServerFn(getPublicSiteSettings);
-  const s = useQuery({ queryKey: ["public-settings"], queryFn: () => f(), staleTime: 60_000 });
+  const s = useQuery({ queryKey: ["public-settings"], queryFn: () => getPublicSiteSettings(), staleTime: 60_000 });
   const d = s.data;
   const year = new Date().getFullYear();
 

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useServerFn } from "@/lib/tanstack-start-compat";
 import { useState } from "react";
 import { listCustomers, upsertCustomer } from "@/lib/customers.functions";
 import { listCredits, upsertCredit, deleteCredit, addCreditPayment } from "@/lib/customers.functions";

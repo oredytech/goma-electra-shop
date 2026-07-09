@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ShoppingCart, Trash2, Plus, Minus, LogOut, UserCircle, ShieldCheck } from "lucide-react";
@@ -33,7 +33,7 @@ export function ShopHeader() {
   async function signOut() {
     await supabase.auth.signOut();
     toast.success("Déconnecté");
-    nav({ to: "/" });
+    nav("/");
   }
 
   return (

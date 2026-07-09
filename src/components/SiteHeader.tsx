@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ShoppingCart, Trash2, Plus, Minus, LogOut, ShieldCheck, Menu, X, Phone, Mail, MapPin, Home, Store, Wrench, MessageCircle } from "lucide-react";
@@ -6,7 +6,6 @@ import { useCart } from "@/lib/cart";
 import { formatUSD } from "@/lib/format";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckoutDialog } from "@/components/CheckoutDialog";
 import logoAsset from "@/assets/conetec-logo.png.asset.json";
@@ -35,8 +34,7 @@ export function SiteHeader() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
-  const fSettings = useServerFn(getPublicSiteSettings);
-  const settings = useQuery({ queryKey: ["public-settings"], queryFn: () => fSettings(), staleTime: 60_000 });
+  const settings = useQuery({ queryKey: ["public-settings"], queryFn: () => getPublicSiteSettings(), staleTime: 60_000 });
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user ? { email: data.user.email } : null));
@@ -49,7 +47,7 @@ export function SiteHeader() {
   async function signOut() {
     await supabase.auth.signOut();
     toast.success("Déconnecté");
-    nav({ to: "/" });
+    nav("/");
   }
 
   const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : "";

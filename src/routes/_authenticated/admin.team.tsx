@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useServerFn } from "@/lib/tanstack-start-compat";
 import { useState } from "react";
 import { listTeam, assignRole, removeRole, createUserWithPassword, resetUserPassword } from "@/lib/admin.functions";
 import { Card } from "@/components/ui/card";

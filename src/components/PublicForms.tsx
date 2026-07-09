@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { submitContactMessage, submitProductSuggestion } from "@/lib/public-forms.functions";
 import { getPublicSiteSettings } from "@/lib/site-settings.functions";
@@ -12,10 +11,7 @@ import { Mail, Phone, MapPin, MessageCircle, Lightbulb, Send } from "lucide-reac
 import { toast } from "sonner";
 
 export function PublicForms() {
-  const fContact = useServerFn(submitContactMessage);
-  const fSuggest = useServerFn(submitProductSuggestion);
-  const fSettings = useServerFn(getPublicSiteSettings);
-  const settings = useQuery({ queryKey: ["public-settings"], queryFn: () => fSettings(), staleTime: 60_000 });
+  const settings = useQuery({ queryKey: ["public-settings"], queryFn: () => getPublicSiteSettings(), staleTime: 60_000 });
 
   const [c, setC] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [s, setS] = useState({ product_name: "", description: "", suggester_name: "", suggester_phone: "", suggester_email: "" });
@@ -26,7 +22,7 @@ export function PublicForms() {
     e.preventDefault();
     setBusy1(true);
     try {
-      await fContact({ data: c });
+      await submitContactMessage({ data: c });
       toast.success("Message envoyé — nous vous répondons vite.");
       setC({ name: "", email: "", phone: "", subject: "", message: "" });
     } catch (err) { toast.error(err instanceof Error ? err.message : "Erreur"); }
@@ -36,7 +32,7 @@ export function PublicForms() {
     e.preventDefault();
     setBusy2(true);
     try {
-      await fSuggest({ data: s });
+      await submitProductSuggestion({ data: s });
       toast.success("Merci pour la suggestion !");
       setS({ product_name: "", description: "", suggester_name: "", suggester_phone: "", suggester_email: "" });
     } catch (err) { toast.error(err instanceof Error ? err.message : "Erreur"); }

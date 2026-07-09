@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { listProductsAdmin, createDirectSale, getOrderDetail } from "@/lib/admin.functions";
 import { getPublicSiteSettings } from "@/lib/site-settings.functions";
 import { downloadInvoicePDF, printInvoicePDF, styleFromSettings } from "@/lib/invoice-pdf";
@@ -15,12 +14,8 @@ import { toast } from "sonner";
 
 export function DirectSaleDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const qc = useQueryClient();
-  const fList = useServerFn(listProductsAdmin);
-  const fSell = useServerFn(createDirectSale);
-  const fDetail = useServerFn(getOrderDetail);
-  const fSettings = useServerFn(getPublicSiteSettings);
-  const prods = useQuery({ queryKey: ["admin-products"], queryFn: () => fList(), enabled: open });
-  const settings = useQuery({ queryKey: ["public-settings"], queryFn: () => fSettings(), staleTime: 60_000 });
+  const prods = useQuery({ queryKey: ["admin-products"], queryFn: () => listProductsAdmin(), enabled: open });
+  const settings = useQuery({ queryKey: ["public-settings"], queryFn: () => getPublicSiteSettings(), staleTime: 60_000 });
   const [q, setQ] = useState("");
   const [cart, setCart] = useState<Record<string, number>>({});
   const [customer, setCustomer] = useState({ name: "", phone: "" });
@@ -55,7 +50,7 @@ export function DirectSaleDialog({ open, onOpenChange }: { open: boolean; onOpen
     if (cartLines.length === 0) return toast.error("Ajoutez au moins un produit");
     setSaving(true);
     try {
-      const res = await fSell({
+      const res = await createDirectSale({
         data: {
           customer_name: customer.name, customer_phone: customer.phone, payment_method: method,
           items: cartLines.map((l) => ({ product_id: l.id, quantity: l.qty })),
@@ -73,7 +68,7 @@ export function DirectSaleDialog({ open, onOpenChange }: { open: boolean; onOpen
 
   async function buildInvoice() {
     if (!lastSale) return null;
-    const d = await fDetail({ data: { id: lastSale.id } });
+    const d = await getOrderDetail({ data: { id: lastSale.id } });
     const s = settings.data;
     const inv = {
       invoiceNumber: d.invoice?.invoice_number ?? null,

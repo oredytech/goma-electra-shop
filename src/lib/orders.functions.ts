@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from "@/lib/tanstack-start-compat";
 import { z } from "zod";
 
 // Guest checkout: anyone can place an order. Uses supabaseAdmin to bypass RLS

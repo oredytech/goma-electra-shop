@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from "@/lib/tanstack-start-compat";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";

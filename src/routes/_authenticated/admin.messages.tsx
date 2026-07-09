@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { listContactMessages, listProductSuggestions, markContactHandled, updateSuggestionStatus, replyContactMessage, replyProductSuggestion } from "@/lib/public-forms.functions";
+import { useServerFn } from "@/lib/tanstack-start-compat";
+import {
+  listContactMessages,
+  listProductSuggestions,
+  markContactHandled,
+  updateSuggestionStatus,
+  replyContactMessage,
+  replyProductSuggestion,
+} from "@/lib/public-forms.functions";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

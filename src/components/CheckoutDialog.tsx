@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart";
 import { formatUSD } from "@/lib/format";
-import { useServerFn } from "@tanstack/react-start";
 import { placeOrder } from "@/lib/orders.functions";
 import { toast } from "sonner";
 import { Loader2, MapPin, Phone, CheckCircle2, Smartphone } from "lucide-react";
@@ -20,7 +19,6 @@ export function CheckoutDialog({ open, onOpenChange }: { open: boolean; onOpenCh
   const items = useCart((s) => s.items);
   const subtotal = useCart((s) => s.subtotal());
   const clear = useCart((s) => s.clear);
-  const place = useServerFn(placeOrder);
 
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState<null | { orderNumber: string; total: number; paymentUrl: string | null }>(null);
@@ -33,7 +31,7 @@ export function CheckoutDialog({ open, onOpenChange }: { open: boolean; onOpenCh
     if (items.length === 0) return toast.error("Votre panier est vide");
     setLoading(true);
     try {
-      const r = await place({
+      const r = await placeOrder({
         data: {
           customer: form,
           items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
